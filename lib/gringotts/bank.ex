@@ -1,29 +1,45 @@
 defmodule Bank do
-  defstruct name: "Main Bank", ledgers: %{}
+  defstruct [:central_bank, name: "Main Bank", ledgers: %{}]
 
-  # TODO: REFACTOR THIS SHIT!!!
   def open_deposit_account(%Bank{} = bank, owner_no) when is_binary(owner_no) do
-    add_account(bank, "deposit", owner_no)
+    case add_account(bank, "deposit", owner_no) do
+      {:ok, _} = resp -> resp
+      {:error, _} = error -> error
+    end
   end
 
-  def deposit_cash(%Bank{ledgers: ledgers} = bank, account_no, amount) do
-    IO.inspect(get_account(bank, account_no))
-
+  def deposit_cash(%Bank{} = bank, account_no, amount) do
     case get_account(bank, account_no) do
-      {:error, _} = error ->
-        error
+      {:ok, _} -> transfer(bank, "cash", account_no, amount)
+      {:error, _} = err -> err
+    end
+  end
 
-      _ ->
-        with {:ok, credit_ledger} <- Ledger.credit(ledgers["deposit"], account_no, amount),
-             {:ok, debit_ledger} <- Ledger.debit(ledgers["cash"], "cash", amount) do
-          {:ok,
-           put_in(
-             bank.ledgers,
-             bank.ledgers
-             |> put_in(["cash"], debit_ledger)
-             |> put_in(["deposit"], credit_ledger)
-           )}
-        end
+  def transfer(%Bank{} = bank, debit_no, credit_no, amount) do
+    with {:ok, bank} <- credit(bank, credit_no, amount),
+         {:ok, bank} <- debit(bank, debit_no, amount) do
+      {:ok, bank}
+    end
+  end
+
+  defp credit(%Bank{} = bank, account_no, amount) do
+    with {:ok, ledger} = get_ledger(bank, account_no),
+         {:ok, ledger} = Ledger.credit(ledger, account_no, amount) do
+      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
+    end
+  end
+
+  defp debit(%Bank{} = bank, account_no, amount) do
+    with {:ok, ledger} = get_ledger(bank, account_no),
+         {:ok, ledger} = Ledger.debit(ledger, account_no, amount) do
+      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
+    end
+  end
+
+  def get_ledger(%Bank{} = bank, account_no) do
+    case bank.ledgers |> Enum.find(fn {_name, ledger} -> ledger.accounts[account_no] end) do
+      nil -> {:error, {:ledger_not_found, [account_no: account_no]}}
+      {_name, ledger} -> {:ok, ledger}
     end
   end
 
@@ -36,7 +52,7 @@ defmodule Bank do
          # get the account from the map if it exists
          |> Map.get(account_no) do
       nil -> {:error, :account_not_found}
-      account -> account
+      account -> {:ok, account}
     end
   end
 
@@ -46,7 +62,6 @@ defmodule Bank do
         {:error, {:ledger_already_exists, name}}
 
       false ->
-        # set the polarity
         {:ok,
          %{
            bank
@@ -79,11 +94,15 @@ defmodule Bank do
     end
   end
 
-  def init_ledgers(%Bank{} = bank) do
+  def init_customer_bank_ledgers(%Bank{} = bank) do
     with {:ok, bank} <- add_ledger(bank, "deposit", "deposit", "liability"),
          {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
          {:ok, bank} <- add_account(bank, "cash") do
       {:ok, bank}
     end
+  end
+
+  def init_central_bank_ledgers(%Bank{} = bank) do
+    {:ok, bank}
   end
 end
