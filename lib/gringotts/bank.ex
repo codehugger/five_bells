@@ -19,6 +19,8 @@ defmodule Bank do
     with {:ok, bank} <- credit(bank, credit_no, amount),
          {:ok, bank} <- debit(bank, debit_no, amount) do
       {:ok, bank}
+    else
+      err -> err
     end
   end
 
@@ -99,6 +101,8 @@ defmodule Bank do
          {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
          {:ok, bank} <- add_account(bank, "cash") do
       {:ok, bank}
+    else
+      {:error, _} = error -> error
     end
   end
 
