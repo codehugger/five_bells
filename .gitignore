@@ -1,6 +1,10 @@
 # The directory Mix will write compiled artifacts to.
 /_build/
 
+# Ignore log and tmp directories
+/tmp
+/log
+
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 
@@ -24,4 +28,3 @@ gringotts-*.tar
 
 # Ignore elixir-ls
 .elixir_ls
-

@@ -1,9 +1,9 @@
 defmodule Bank do
   defstruct [:central_bank, name: "Main Bank", ledgers: %{}]
 
-  def open_deposit_account(%Bank{} = bank, owner_no) when is_binary(owner_no) do
-    case add_account(bank, "deposit", owner_no) do
-      {:ok, _} = resp -> resp
+  def open_deposit_account(%Bank{} = bank) do
+    case add_account(bank, "deposit") do
+      {:ok, _bank, _account_no} = resp -> resp
       {:error, _} = error -> error
     end
   end
@@ -77,21 +77,23 @@ defmodule Bank do
     end
   end
 
-  def add_account(%Bank{} = bank, ledger_name, owner_no \\ "internal") do
+  def add_account(
+        %Bank{} = bank,
+        ledger_name,
+        account_no \\ nil
+      )
+      when is_binary(ledger_name) do
     case bank.ledgers[ledger_name] do
       nil ->
         {:error, {:ledger_not_found, ledger_name}}
 
       ledger ->
-        account_no =
-          case ledger_name do
-            "deposit" -> "#{length(Map.keys(ledger.accounts)) + 1}" |> String.pad_leading(4, "0")
-            _ -> ledger_name
-          end
+        case Ledger.add_account(ledger, account_no) do
+          {:ok, ledger, acc_no} ->
+            {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger_name, ledger)}, acc_no}
 
-        case Ledger.add_account(ledger, account_no, owner_no) do
-          {:ok, ledger} -> {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger_name, ledger)}}
-          {:error, _} = error -> error
+          {:error, _} = error ->
+            error
         end
     end
   end
@@ -99,7 +101,7 @@ defmodule Bank do
   def init_customer_bank_ledgers(%Bank{} = bank) do
     with {:ok, bank} <- add_ledger(bank, "deposit", "deposit", "liability"),
          {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
-         {:ok, bank} <- add_account(bank, "cash") do
+         {:ok, bank, _} <- add_account(bank, "cash", "cash") do
       {:ok, bank}
     else
       {:error, _} = error -> error

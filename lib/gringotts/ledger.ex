@@ -8,7 +8,14 @@ defmodule Ledger do
     accounts: %{}
   ]
 
-  def add_account(%Ledger{accounts: accounts} = ledger, account_no, owner_no) do
+  def add_account(%Ledger{} = ledger), do: add_account(ledger, nil)
+
+  def add_account(%Ledger{} = ledger, account_no) when account_no == nil do
+    add_account(ledger, generate_account_no(ledger))
+  end
+
+  def add_account(%Ledger{accounts: accounts} = ledger, account_no)
+      when is_binary(account_no) do
     case Map.has_key?(accounts, account_no) do
       true ->
         {:error, {:account_exists, account_no}}
@@ -17,9 +24,8 @@ defmodule Ledger do
         {:ok,
          %{
            ledger
-           | accounts:
-               Map.put(accounts, account_no, %Account{account_no: account_no, owner_no: owner_no})
-         }}
+           | accounts: Map.put(accounts, account_no, %Account{account_no: account_no})
+         }, account_no}
     end
   end
 
@@ -51,5 +57,10 @@ defmodule Ledger do
           false -> {:ok, put_in(ledger.accounts[account_no].deposit, total_amount)}
         end
     end
+  end
+
+  defp generate_account_no(%Ledger{} = ledger) do
+    "#{length(Map.keys(ledger.accounts)) + 1}"
+    |> String.pad_leading(4, "0")
   end
 end

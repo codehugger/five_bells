@@ -1,3 +1,3 @@
 defmodule Account do
-  defstruct [:account_no, :owner_no, deposit: 0]
+  defstruct [:account_no, deposit: 0]
 end
