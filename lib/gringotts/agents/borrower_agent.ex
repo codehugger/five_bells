@@ -32,10 +32,10 @@ defmodule BorrowerAgent do
 
   def evaluate(agent, _cycle) do
     case BankAgent.get_loan(bank(agent), agent) do
-      true ->
-        IO.puts("Paying back loan")
+      {:ok, _loan} ->
+        BankAgent.pay_loan(bank(agent), agent)
 
-      false ->
+      {:error, :loan_not_found} ->
         BankAgent.request_loan(bank(agent), agent, loan_amount(agent))
     end
   end

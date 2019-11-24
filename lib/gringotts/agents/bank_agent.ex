@@ -9,9 +9,7 @@ defmodule BankAgent do
       # owner_registry - account_no => owner
       owner_registry: %{},
       # a special set of employees that get a salary based on outstanding debt
-      borrowers: %{},
-      # loan_registry - borrower => loan
-      loan_registry: %{}
+      borrowers: %{}
     ]
   end
 
@@ -49,7 +47,14 @@ defmodule BankAgent do
   end
 
   def get_loan(agent, owner) when is_pid(owner) do
-    loan_registry(agent)[owner]
+    case get_account_no(agent, owner) do
+      {:ok, account_no} -> get_loan(agent, account_no)
+      err -> err
+    end
+  end
+
+  def get_loan(agent, account_no) when is_binary(account_no) do
+    Bank.get_loan(bank(agent), account_no)
   end
 
   def get_account_deposit(agent, owner) when is_pid(owner) do
