@@ -1,5 +1,5 @@
 defmodule Bank do
-  defstruct [:central_bank, name: "Main Bank", ledgers: %{}]
+  defstruct [:central_bank, name: "Bank", ledgers: %{}, transactions: []]
 
   def open_deposit_account(%Bank{} = bank) do
     case add_account(bank, "deposit") do
@@ -17,7 +17,8 @@ defmodule Bank do
 
   def transfer(%Bank{} = bank, debit_no, credit_no, amount) do
     with {:ok, bank} <- credit(bank, credit_no, amount),
-         {:ok, bank} <- debit(bank, debit_no, amount) do
+         {:ok, bank} <- debit(bank, debit_no, amount),
+         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount) do
       {:ok, bank}
     else
       err -> err
@@ -110,5 +111,15 @@ defmodule Bank do
 
   def init_central_bank_ledgers(%Bank{} = bank) do
     {:ok, bank}
+  end
+
+  defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount) do
+    {:ok,
+     %{
+       bank
+       | transactions: [
+           %Transaction{deb_no: deb_no, cred_no: cred_no, amount: amount} | bank.transactions
+         ]
+     }}
   end
 end
