@@ -7,11 +7,15 @@ defmodule BankAgent do
       # account_registry - owner => account_no
       account_registry: %{},
       # owner_registry - account_no => owner
-      owner_registry: %{}
+      owner_registry: %{},
+      # a special set of employees that get a salary based on outstanding debt
+      borrowers: %{},
+      # loan_registry - borrower => loan
+      loan_registry: %{}
     ]
   end
 
-  def start_link(args) do
+  def start_link(args \\ []) do
     case Bank.init_customer_bank_ledgers(%Bank{}) do
       {:ok, bank} -> Agent.start_link(fn -> struct(State, [bank: bank] ++ args) end)
       err -> err
@@ -24,6 +28,7 @@ defmodule BankAgent do
   def bank(agent), do: state(agent).bank
   def account_registry(agent), do: state(agent).account_registry
   def owner_registry(agent), do: state(agent).owner_registry
+  def loan_registry(agent), do: state(agent).loan_registry
 
   def get_account_no(agent, owner) when is_pid(owner) do
     case account_registry(agent)[owner] do
@@ -41,6 +46,10 @@ defmodule BankAgent do
       {:ok, account_no} -> Bank.get_account(bank(agent), account_no)
       err -> err
     end
+  end
+
+  def get_loan(agent, owner) when is_pid(owner) do
+    loan_registry(agent)[owner]
   end
 
   def get_account_deposit(agent, owner) when is_pid(owner) do
@@ -96,6 +105,28 @@ defmodule BankAgent do
     end
   end
 
+  def request_loan(agent, borrower, amount) do
+    with {:ok, account_no} <- get_account_no(agent, borrower),
+         {:ok, bank} <- Bank.request_loan(bank(agent), account_no, amount) do
+      Agent.update(agent, fn x -> %{x | bank: bank} end)
+    else
+      err -> err
+    end
+  end
+
+  def pay_loan(agent, borrower) do
+    case get_account_no(agent, borrower) do
+      {:ok, account_no} ->
+        case Bank.pay_loan(bank(agent), account_no) do
+          {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
+          err -> err
+        end
+
+      err ->
+        err
+    end
+  end
+
   def transfer(agent, from_owner, to_owner, amount)
       when is_pid(from_owner) and is_pid(to_owner) and amount > 0 do
     with {:ok, from_no} <- get_account_no(agent, from_owner),
@@ -106,11 +137,33 @@ defmodule BankAgent do
     end
   end
 
+  def transfer(agent, from_owner, to_no, amount) when is_pid(from_owner) and is_binary(to_no) do
+    case get_account_no(agent, from_owner) do
+      {:ok, from_no} -> transfer(agent, from_no, to_no, amount)
+    end
+  end
+
+  def transfer(agent, from_no, to_owner, amount) when is_binary(from_no) and is_pid(to_owner) do
+    case get_account_no(agent, to_owner) do
+      {:ok, to_no} -> transfer(agent, from_no, to_no, amount)
+    end
+  end
+
   def transfer(agent, from_no, to_no, amount)
       when is_binary(from_no) and is_binary(to_no) and amount > 0 do
     case Bank.transfer(bank(agent), from_no, to_no, amount) do
       {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
     end
+  end
+
+  def hire_borrower(agent, borrower) do
+    Agent.update(agent, fn x -> %{x | borrowers: x.borrowers ++ [borrower]} end)
+  end
+
+  def fire_borrower(agent, borrower) do
+    Agent.update(agent, fn x ->
+      %{x | borrowers: Enum.reject(x.borrowers, fn b -> b == borrower end)}
+    end)
   end
 
   defp register_account_ownership(agent, owner, account_no)

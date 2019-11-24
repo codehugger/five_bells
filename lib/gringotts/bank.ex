@@ -1,5 +1,12 @@
 defmodule Bank do
-  defstruct [:central_bank, name: "Bank", ledgers: %{}, transactions: []]
+  defstruct [
+    :central_bank,
+    name: "Bank",
+    ledgers: %{},
+    loans: %{},
+    paid_loans: %{},
+    transactions: []
+  ]
 
   def open_deposit_account(%Bank{} = bank) do
     case add_account(bank, "deposit") do
@@ -15,27 +22,61 @@ defmodule Bank do
     end
   end
 
+  def pay_loan(%Bank{} = bank, account_no) do
+    case get_loan(bank, account_no) do
+      {:ok, loan} ->
+        payment = Loan.next_payment(loan)
+
+        with {:ok, bank} <- transfer(bank, account_no, "loan", payment.capital),
+             {:ok, bank} <- transfer(bank, account_no, "interest_income", payment.interest),
+             {:ok, loan} <- Loan.make_payment(loan) do
+          case Loan.paid_off?(loan) do
+            false ->
+              {:ok, %{bank | loans: Map.put(bank.loans, account_no, loan)}}
+
+            true ->
+              {:ok,
+               %{
+                 bank
+                 | loans: Map.delete(bank.loans, account_no),
+                   paid_loans: Map.update(bank.paid_loans, account_no, [loan], &[loan | &1])
+               }}
+          end
+        else
+          err -> err
+        end
+
+      err ->
+        err
+    end
+  end
+
+  def request_loan(%Bank{} = bank, account_no, amount) do
+    case bank.loans[account_no] do
+      nil ->
+        loan = %Loan{principal: amount, duration: 1} |> Loan.calculate_payments()
+
+        case transfer(bank, "loan", account_no, amount) do
+          {:ok, bank} -> {:ok, %{bank | loans: Map.put_new(bank.loans, account_no, loan)}}
+          err -> err
+        end
+
+      _ ->
+        {:error, :account_has_outstanding_loan}
+    end
+  end
+
+  def transfer(%Bank{} = bank, _, _, amount) when amount == 0 do
+    {:ok, bank}
+  end
+
   def transfer(%Bank{} = bank, debit_no, credit_no, amount) do
     with {:ok, bank} <- credit(bank, credit_no, amount),
          {:ok, bank} <- debit(bank, debit_no, amount),
          {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount) do
       {:ok, bank}
     else
-      err -> err
-    end
-  end
-
-  defp credit(%Bank{} = bank, account_no, amount) do
-    with {:ok, ledger} = get_ledger(bank, account_no),
-         {:ok, ledger} = Ledger.credit(ledger, account_no, amount) do
-      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
-    end
-  end
-
-  defp debit(%Bank{} = bank, account_no, amount) do
-    with {:ok, ledger} = get_ledger(bank, account_no),
-         {:ok, ledger} = Ledger.debit(ledger, account_no, amount) do
-      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
+      {:error, _} = err -> err
     end
   end
 
@@ -56,6 +97,13 @@ defmodule Bank do
          |> Map.get(account_no) do
       nil -> {:error, :account_not_found}
       account -> {:ok, account}
+    end
+  end
+
+  def get_loan(%Bank{} = bank, account_no) do
+    case bank.loans[account_no] do
+      nil -> {:error, :loan_not_found}
+      loan -> {:ok, loan}
     end
   end
 
@@ -101,8 +149,14 @@ defmodule Bank do
 
   def init_customer_bank_ledgers(%Bank{} = bank) do
     with {:ok, bank} <- add_ledger(bank, "deposit", "deposit", "liability"),
+         # Cash
          {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
-         {:ok, bank, _} <- add_account(bank, "cash", "cash") do
+         {:ok, bank, _} <- add_account(bank, "cash", "cash"),
+         # Loans
+         {:ok, bank} <- add_ledger(bank, "loan", "loan", "asset"),
+         {:ok, bank, _} <- add_account(bank, "loan", "loan"),
+         {:ok, bank} <- add_ledger(bank, "interest_income", "interest_income", "liability"),
+         {:ok, bank, _} <- add_account(bank, "interest_income", "interest_income") do
       {:ok, bank}
     else
       {:error, _} = error -> error
@@ -111,6 +165,24 @@ defmodule Bank do
 
   def init_central_bank_ledgers(%Bank{} = bank) do
     {:ok, bank}
+  end
+
+  defp credit(%Bank{} = bank, account_no, amount) do
+    with {:ok, ledger} <- get_ledger(bank, account_no),
+         {:ok, ledger} <- Ledger.credit(ledger, account_no, amount) do
+      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
+    else
+      err -> err
+    end
+  end
+
+  defp debit(%Bank{} = bank, account_no, amount) do
+    with {:ok, ledger} <- get_ledger(bank, account_no),
+         {:ok, ledger} <- Ledger.debit(ledger, account_no, amount) do
+      {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger.name, ledger)}}
+    else
+      err -> err
+    end
   end
 
   defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount) do
