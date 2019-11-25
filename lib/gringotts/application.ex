@@ -1,4 +1,4 @@
-defmodule Gringotts.Application do
+defmodule FiveBells.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -7,13 +7,13 @@ defmodule Gringotts.Application do
 
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Gringotts.Worker.start_link(arg)
-      # {Gringotts.Worker, arg}
+      # Starts a worker by calling: FiveBells.Worker.start_link(arg)
+      # {FiveBells.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Gringotts.Supervisor]
+    opts = [strategy: :one_for_one, name: FiveBells.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

@@ -1,9 +1,9 @@
-defmodule Gringotts.MixProject do
+defmodule FiveBells.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :gringotts,
+      app: :five_bells,
       version: "0.1.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
@@ -15,7 +15,7 @@ defmodule Gringotts.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Gringotts.Application, []}
+      mod: {FiveBells.Application, []}
     ]
   end
 

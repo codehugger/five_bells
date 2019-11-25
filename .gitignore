@@ -24,7 +24,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-gringotts-*.tar
+five_bells-*.tar
 
 # Ignore elixir-ls
 .elixir_ls
