@@ -1,7 +1,7 @@
 defmodule Loan do
   defstruct principal: 0,
             interest_rate: 0.0,
-            duration: 1,
+            duration: 12,
             period: 1,
             scheduled_payments: [],
             payments_made: [],
@@ -9,28 +9,32 @@ defmodule Loan do
 
   def paid_off?(%Loan{} = loan), do: length(loan.payments_remaining) == 0
   def monthly_rate(%Loan{} = loan), do: loan.interest_rate * 0.01 / 12.0
-
   def no_payments(%Loan{} = loan), do: round(loan.duration / loan.period)
 
-  def(monthly_payment(%Loan{} = loan)) do
+  def monthly_payment(%Loan{} = loan) do
     monthly_rate = Loan.monthly_rate(loan)
 
-    loan.principal * monthly_rate /
-      (1.0 - 1.0 / :math.pow(1.0 + monthly_rate, loan.duration))
+    case monthly_rate == 0 do
+      true ->
+        loan.principal / no_payments(loan)
+
+      false ->
+        loan.principal * monthly_rate /
+          (1.0 - 1.0 / :math.pow(1.0 + monthly_rate, loan.duration))
+    end
   end
 
   def calculate_payments(%Loan{} = loan) do
     {payments, _} =
       Enum.map_reduce(1..no_payments(loan), loan.principal, fn payment_no, remains ->
-        interest_payment = remains * monthly_rate(loan)
+        interest_payment = round(:math.floor(remains * monthly_rate(loan)))
         capital_payment = round(monthly_payment(loan) - interest_payment)
-        remains = remains - capital_payment
 
         {%LoanPayment{
            payment_no: payment_no,
-           capital: loan.principal / loan.duration,
-           interest: round(interest_payment)
-         }, remains}
+           capital: capital_payment,
+           interest: interest_payment
+         }, remains - capital_payment}
       end)
 
     %Loan{
@@ -43,24 +47,23 @@ defmodule Loan do
 
   def next_payment(%Loan{} = loan) do
     case loan.payments_remaining do
-      [] -> nil
-      [next] -> next
-      [next | _] -> next
+      [] -> {:error, :loan_paid_off}
+      [next | _] -> {:ok, next}
     end
   end
 
   def make_payment(%Loan{} = loan) do
     case next_payment(loan) do
-      nil ->
-        {:error, :loan_paid_off}
-
-      payment ->
+      {:ok, payment} ->
         {:ok,
          %Loan{
            loan
            | payments_made: [payment | loan.payments_made],
              payments_remaining: Enum.reject(loan.payments_remaining, fn x -> x == payment end)
          }}
+
+      err ->
+        err
     end
   end
 

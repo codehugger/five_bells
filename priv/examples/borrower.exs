@@ -16,9 +16,29 @@
 # Agent simulation
 
 {:ok, bank} = BankAgent.start_link()
-{:ok, borrower} = BorrowerAgent.start_link(bank: bank, loan_amount: 10)
 
-BorrowerAgent.evaluate(borrower, 0)
-BorrowerAgent.evaluate(borrower, 0)
+{:ok, borrower1} =
+  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
 
-IO.inspect(BankAgent.state(bank))
+{:ok, borrower2} =
+  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+
+{:ok, borrower3} =
+  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+
+{:ok, borrower4} =
+  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+
+{:ok, borrower5} =
+  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+
+Enum.each(1..20, fn cycle ->
+  BankAgent.evaluate(bank, cycle)
+  BorrowerAgent.evaluate(borrower1, cycle)
+  BorrowerAgent.evaluate(borrower2, cycle)
+  BorrowerAgent.evaluate(borrower3, cycle)
+  BorrowerAgent.evaluate(borrower4, cycle)
+  BorrowerAgent.evaluate(borrower5, cycle)
+end)
+
+IO.inspect(:sys.get_state(bank))

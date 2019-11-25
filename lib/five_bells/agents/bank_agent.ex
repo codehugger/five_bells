@@ -9,7 +9,7 @@ defmodule BankAgent do
       # owner_registry - account_no => owner
       owner_registry: %{},
       # a special set of employees that get a salary based on outstanding debt
-      borrowers: %{}
+      borrowers: []
     ]
   end
 
@@ -27,6 +27,14 @@ defmodule BankAgent do
   def account_registry(agent), do: state(agent).account_registry
   def owner_registry(agent), do: state(agent).owner_registry
   def loan_registry(agent), do: state(agent).loan_registry
+  def borrowers(agent), do: state(agent).borrowers
+
+  def has_debt?(agent, customer) do
+    case get_loan(agent, customer) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
+  end
 
   def get_account_no(agent, owner) when is_pid(owner) do
     case account_registry(agent)[owner] do
@@ -66,7 +74,7 @@ defmodule BankAgent do
 
   def get_account_deposit(agent, account_no) when is_binary(account_no) do
     case get_account(agent, account_no) do
-      {:ok, account} -> account.deposit
+      {:ok, account} -> {:ok, account.deposit}
       err -> err
     end
   end
@@ -110,9 +118,10 @@ defmodule BankAgent do
     end
   end
 
-  def request_loan(agent, borrower, amount) do
+  def request_loan(agent, borrower, amount, duration \\ 12, interest_rate \\ 0.0) do
     with {:ok, account_no} <- get_account_no(agent, borrower),
-         {:ok, bank} <- Bank.request_loan(bank(agent), account_no, amount) do
+         {:ok, bank} <-
+           Bank.request_loan(bank(agent), account_no, amount, duration, interest_rate) do
       Agent.update(agent, fn x -> %{x | bank: bank} end)
     else
       err -> err
@@ -120,54 +129,85 @@ defmodule BankAgent do
   end
 
   def pay_loan(agent, borrower) do
-    case get_account_no(agent, borrower) do
-      {:ok, account_no} ->
-        case Bank.pay_loan(bank(agent), account_no) do
-          {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
-          err -> err
-        end
-
+    with {:ok, account_no} <- get_account_no(agent, borrower),
+         {:ok, bank} <- Bank.pay_loan(bank(agent), account_no) do
+      Agent.update(agent, fn x -> %{x | bank: bank} end)
+    else
       err ->
         err
     end
   end
 
-  def transfer(agent, from_owner, to_owner, amount)
+  def transfer(agent, from, to, amount, text \\ "")
+
+  def transfer(agent, from_owner, to_owner, amount, text)
       when is_pid(from_owner) and is_pid(to_owner) and amount > 0 do
     with {:ok, from_no} <- get_account_no(agent, from_owner),
          {:ok, to_no} <- get_account_no(agent, to_owner) do
-      transfer(agent, from_no, to_no, amount)
+      transfer(agent, from_no, to_no, amount, text)
     else
       err -> err
     end
   end
 
-  def transfer(agent, from_owner, to_no, amount) when is_pid(from_owner) and is_binary(to_no) do
+  def transfer(agent, from_owner, to_no, amount, text)
+      when is_pid(from_owner) and is_binary(to_no) do
     case get_account_no(agent, from_owner) do
-      {:ok, from_no} -> transfer(agent, from_no, to_no, amount)
+      {:ok, from_no} -> transfer(agent, from_no, to_no, amount, text)
+      err -> err
     end
   end
 
-  def transfer(agent, from_no, to_owner, amount) when is_binary(from_no) and is_pid(to_owner) do
+  def transfer(agent, from_no, to_owner, amount, text)
+      when is_binary(from_no) and is_pid(to_owner) do
     case get_account_no(agent, to_owner) do
-      {:ok, to_no} -> transfer(agent, from_no, to_no, amount)
+      {:ok, to_no} -> transfer(agent, from_no, to_no, amount, text)
+      err -> err
     end
   end
 
-  def transfer(agent, from_no, to_no, amount)
+  def transfer(agent, from_no, to_no, amount, text)
       when is_binary(from_no) and is_binary(to_no) and amount > 0 do
-    case Bank.transfer(bank(agent), from_no, to_no, amount) do
+    case Bank.transfer(bank(agent), from_no, to_no, amount, text) do
       {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
+      err -> err
     end
   end
 
   def hire_borrower(agent, borrower) do
-    Agent.update(agent, fn x -> %{x | borrowers: x.borrowers ++ [borrower]} end)
+    Agent.update(agent, fn x -> Map.update(x, :borrowers, [borrower], &[borrower | &1]) end)
   end
 
-  def fire_borrower(agent, borrower) do
-    Agent.update(agent, fn x ->
-      %{x | borrowers: Enum.reject(x.borrowers, fn b -> b == borrower end)}
+  def fire_borrowers(agent) do
+    borrowers = Enum.filter(borrowers(agent), fn b -> BankAgent.has_debt?(agent, b) end)
+    Agent.update(agent, fn x -> %{x | borrowers: borrowers} end)
+  end
+
+  def evaluate(agent, _cycle) do
+    # fire borrowers who have paid their debts
+    fire_borrowers(agent)
+
+    # pay borrowers salaries so they can afford their next payments
+    Enum.each(borrowers(agent), fn b ->
+      # get total of next payment
+      {:ok, loan} = get_loan(agent, b)
+      {:ok, payment} = Loan.next_payment(loan)
+      {:ok, deposit} = get_account_deposit(agent, "interest_income")
+
+      case deposit > 0 do
+        true ->
+          # transfer amount from interest_income to borrower as salary
+          transfer(
+            agent,
+            "interest_income",
+            b,
+            min(LoanPayment.total(payment), deposit),
+            "Borrower salary payment"
+          )
+
+        false ->
+          nil
+      end
     end)
   end
 

@@ -5,7 +5,7 @@
 
 # People
 people =
-  Enum.map(1..200, fn x ->
+  Enum.map(1..50, fn x ->
     {:ok, person} =
       PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 10)
 
@@ -26,7 +26,7 @@ people =
 # [person | _] = people
 # PersonAgent.evaluate(person, 1)
 
-Enum.each(1..200, fn cycle ->
+Enum.each(1..100, fn cycle ->
   people
   |> Enum.shuffle()
   |> Enum.each(fn person ->

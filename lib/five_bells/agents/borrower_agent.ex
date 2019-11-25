@@ -6,7 +6,8 @@ defmodule BorrowerAgent do
       :bank,
       :account_no,
       loan_amount: 0,
-      loan_duration: 0,
+      loan_duration: 12,
+      interest_rate: 0.0,
       initial_deposit: 0
     ]
   end
@@ -28,15 +29,30 @@ defmodule BorrowerAgent do
   def bank(agent), do: state(agent).bank
   def initial_deposit(agent), do: state(agent).initial_deposit
   def loan_amount(agent), do: state(agent).loan_amount
+  def loan_duration(agent), do: state(agent).loan_duration
+  def interest_rate(agent), do: state(agent).interest_rate
   def borrower_window(agent), do: state(agent).borrower_window
 
   def evaluate(agent, _cycle) do
     case BankAgent.get_loan(bank(agent), agent) do
       {:ok, _loan} ->
-        BankAgent.pay_loan(bank(agent), agent)
+        case BankAgent.pay_loan(bank(agent), agent) do
+          {:error, :insufficient_funds} ->
+            # Force the bank to hire the borrower
+            BankAgent.hire_borrower(bank(agent), agent)
+
+          resp ->
+            resp
+        end
 
       {:error, :loan_not_found} ->
-        BankAgent.request_loan(bank(agent), agent, loan_amount(agent))
+        BankAgent.request_loan(
+          bank(agent),
+          agent,
+          loan_amount(agent),
+          loan_duration(agent),
+          interest_rate(agent)
+        )
     end
   end
 

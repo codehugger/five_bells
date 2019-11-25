@@ -3,7 +3,7 @@ defmodule Bank do
     :central_bank,
     name: "Bank",
     ledgers: %{},
-    loans: %{},
+    unpaid_loans: %{},
     paid_loans: %{},
     transactions: []
   ]
@@ -23,42 +23,76 @@ defmodule Bank do
   end
 
   def pay_loan(%Bank{} = bank, account_no) do
-    case get_loan(bank, account_no) do
-      {:ok, loan} ->
-        payment = Loan.next_payment(loan)
+    with {:ok, loan} <- get_loan(bank, account_no),
+         {:ok, account} <- get_account(bank, account_no),
+         {:ok, payment} <- Loan.next_payment(loan) do
+      case account.deposit >= LoanPayment.total(payment) do
+        true ->
+          with {:ok, bank} <-
+                 transfer(bank, account_no, "loan", payment.capital, "Loan - capital payment"),
+               {:ok, bank} <-
+                 transfer(
+                   bank,
+                   account_no,
+                   "interest_income",
+                   payment.interest,
+                   "Loan - interest payment"
+                 ),
+               {:ok, loan} <- Loan.make_payment(loan) do
+            case Loan.paid_off?(loan) do
+              false ->
+                {:ok, %{bank | unpaid_loans: Map.put(bank.unpaid_loans, account_no, loan)}}
 
-        with {:ok, bank} <- transfer(bank, account_no, "loan", payment.capital),
-             {:ok, bank} <- transfer(bank, account_no, "interest_income", payment.interest),
-             {:ok, loan} <- Loan.make_payment(loan) do
-          case Loan.paid_off?(loan) do
-            false ->
-              {:ok, %{bank | loans: Map.put(bank.loans, account_no, loan)}}
-
-            true ->
-              {:ok,
-               %{
-                 bank
-                 | loans: Map.delete(bank.loans, account_no),
-                   paid_loans: Map.update(bank.paid_loans, account_no, [loan], &[loan | &1])
-               }}
+              true ->
+                {:ok,
+                 %{
+                   bank
+                   | unpaid_loans: Map.delete(bank.unpaid_loans, account_no),
+                     paid_loans: Map.update(bank.paid_loans, account_no, [loan], &[loan | &1])
+                 }}
+            end
+          else
+            err -> err
           end
-        else
-          err -> err
-        end
 
-      err ->
-        err
+        false ->
+          {:error, :insufficient_funds}
+      end
+    else
+      err -> err
     end
   end
 
-  def request_loan(%Bank{} = bank, account_no, amount) do
-    case bank.loans[account_no] do
-      nil ->
-        loan = %Loan{principal: amount, duration: 1} |> Loan.calculate_payments()
+  def next_payment(%Bank{} = bank, account_no) do
+    case get_loan(bank, account_no) do
+      {:ok, loan} -> {:ok, Loan.next_payment(loan)}
+      err -> err
+    end
+  end
 
-        case transfer(bank, "loan", account_no, amount) do
-          {:ok, bank} -> {:ok, %{bank | loans: Map.put_new(bank.loans, account_no, loan)}}
-          err -> err
+  def request_loan(
+        %Bank{} = bank,
+        account_no,
+        amount,
+        duration \\ 12,
+        interest_rate \\ 0.0
+      ) do
+    case bank.unpaid_loans[account_no] do
+      nil ->
+        loan =
+          %Loan{
+            principal: amount,
+            duration: duration,
+            interest_rate: interest_rate
+          }
+          |> Loan.calculate_payments()
+
+        case transfer(bank, "loan", account_no, amount, "Loan request transfer") do
+          {:ok, bank} ->
+            {:ok, %{bank | unpaid_loans: Map.put_new(bank.unpaid_loans, account_no, loan)}}
+
+          err ->
+            err
         end
 
       _ ->
@@ -66,14 +100,13 @@ defmodule Bank do
     end
   end
 
-  def transfer(%Bank{} = bank, _, _, amount) when amount == 0 do
-    {:ok, bank}
-  end
+  def transfer(bank, debit_no, credit_no, amount, text \\ "")
+  def transfer(%Bank{} = bank, _, _, amount, _) when amount == 0, do: {:ok, bank}
 
-  def transfer(%Bank{} = bank, debit_no, credit_no, amount) do
+  def transfer(%Bank{} = bank, debit_no, credit_no, amount, text) do
     with {:ok, bank} <- credit(bank, credit_no, amount),
          {:ok, bank} <- debit(bank, debit_no, amount),
-         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount) do
+         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount, text) do
       {:ok, bank}
     else
       {:error, _} = err -> err
@@ -100,8 +133,14 @@ defmodule Bank do
     end
   end
 
-  def get_loan(%Bank{} = bank, account_no) do
-    case bank.loans[account_no] do
+  def get_loan(%Bank{} = bank, account_no, type \\ :unpaid) do
+    loan =
+      case type do
+        :unpaid -> bank.unpaid_loans[account_no]
+        :paid -> bank.paid_loans[account_no]
+      end
+
+    case loan do
       nil -> {:error, :loan_not_found}
       loan -> {:ok, loan}
     end
@@ -185,12 +224,13 @@ defmodule Bank do
     end
   end
 
-  defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount) do
+  defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount, text) do
     {:ok,
      %{
        bank
        | transactions: [
-           %Transaction{deb_no: deb_no, cred_no: cred_no, amount: amount} | bank.transactions
+           %Transaction{deb_no: deb_no, cred_no: cred_no, amount: amount, text: text}
+           | bank.transactions
          ]
      }}
   end

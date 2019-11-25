@@ -1,21 +1,20 @@
 
 # FiveBells - TODO
 
-## v0.2
-
-### A dumb borrower (proof that borrowr <-> bank loop works)
-
-* Takes out a bank loan, uses the capital to pay of the loan
-* Starts to earn a salary from the bank when capital cash has run out to pay the rest of the loan.
-* Bank is forced to employ borrowers.
-
 ## v0.3
+
+### Ecto export
+
+* Add pluggable support for dumping data on transfers, accounts and statistics to a database through Ecto
+* Needs to be implemented as an async agent that the bank has access to
 
 ### An adjusting market (see pries moving with purchases)
 
 * Market adjusts prices with a fixed spread of 1 so bid_price will alwasy be 1 lower than ask_price.
 * Prices go up if inventory is shrinking and they go down if it is increasing
 * prices remain 0 otherwise
+
+## v0.4
 
 ### Factory (pushing its products)
 
@@ -24,6 +23,8 @@
 * Produce produccts and store in inventory
 * procudes and then asks the market to buy at the market priec
 * Remove products from inventory
+
+## v0.5
 
 ### Retail markets
 
