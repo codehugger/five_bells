@@ -1,6 +1,7 @@
-defmodule Gringotts do
+defmodule FiveBells do
   @moduledoc """
-  Documentation for Gringotts.
+  Documentation for FiveBells
+  .
   """
 
   @doc """
@@ -8,7 +9,8 @@ defmodule Gringotts do
 
   ## Examples
 
-      iex> Gringotts.hello()
+      iex> FiveBells
+    .hello()
       :world
 
   """
