@@ -7,18 +7,36 @@ defmodule Loan do
             payments_made: [],
             payments_remaining: []
 
-  def paid_off?(%Loan{} = loan) do
-    length(loan.payments_remaining) == 0
+  def paid_off?(%Loan{} = loan), do: length(loan.payments_remaining) == 0
+  def monthly_rate(%Loan{} = loan), do: loan.interest_rate * 0.01 / 12.0
+
+  def no_payments(%Loan{} = loan), do: round(loan.duration / loan.period)
+
+  def(monthly_payment(%Loan{} = loan)) do
+    monthly_rate = Loan.monthly_rate(loan)
+
+    loan.principal * monthly_rate /
+      (1.0 - 1.0 / :math.pow(1.0 + monthly_rate, loan.duration))
   end
 
   def calculate_payments(%Loan{} = loan) do
+    {payments, _} =
+      Enum.map_reduce(1..no_payments(loan), loan.principal, fn payment_no, remains ->
+        interest_payment = remains * monthly_rate(loan)
+        capital_payment = round(monthly_payment(loan) - interest_payment)
+        remains = remains - capital_payment
+
+        {%LoanPayment{
+           payment_no: payment_no,
+           capital: loan.principal / loan.duration,
+           interest: round(interest_payment)
+         }, remains}
+      end)
+
     %Loan{
       loan
       | payments_made: [],
-        payments_remaining:
-          Enum.map(1..loan.duration, fn _ ->
-            %LoanPayment{capital: loan.principal / loan.duration, interest: 0}
-          end)
+        payments_remaining: payments
     }
     |> add_baloon_payment()
   end
@@ -47,7 +65,16 @@ defmodule Loan do
   end
 
   defp add_baloon_payment(%Loan{} = loan) do
-    _capital_sum = Enum.reduce(loan.payments_remaining, 0, fn x, acc -> acc + x.capital end)
-    loan
+    capital_sum = Enum.reduce(loan.payments_remaining, 0, fn x, acc -> acc + x.capital end)
+    [last | tail] = Enum.reverse(loan.payments_remaining)
+
+    %Loan{
+      loan
+      | payments_remaining:
+          Enum.reverse([
+            %LoanPayment{last | capital: last.capital + (loan.principal - capital_sum)}
+            | tail
+          ])
+    }
   end
 end
