@@ -3,11 +3,6 @@
 
 ## v0.3
 
-### Ecto export
-
-* Add pluggable support for dumping data on transfers, accounts and statistics to a database through Ecto
-* Needs to be implemented as an async agent that the bank has access to
-
 ### An adjusting market (see pries moving with purchases)
 
 * Market adjusts prices with a fixed spread of 1 so bid_price will alwasy be 1 lower than ask_price.
