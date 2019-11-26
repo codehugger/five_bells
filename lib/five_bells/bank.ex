@@ -22,21 +22,29 @@ defmodule Bank do
     end
   end
 
-  def pay_loan(%Bank{} = bank, account_no) do
+  def pay_loan(%Bank{} = bank, account_no, cycle \\ 0) do
     with {:ok, loan} <- get_loan(bank, account_no),
          {:ok, account} <- get_account(bank, account_no),
          {:ok, payment} <- Loan.next_payment(loan) do
       case account.deposit >= LoanPayment.total(payment) do
         true ->
           with {:ok, bank} <-
-                 transfer(bank, account_no, "loan", payment.capital, "Loan - capital payment"),
+                 transfer(
+                   bank,
+                   account_no,
+                   "loan",
+                   payment.capital,
+                   "Loan - capital payment",
+                   cycle
+                 ),
                {:ok, bank} <-
                  transfer(
                    bank,
                    account_no,
                    "interest_income",
                    payment.interest,
-                   "Loan - interest payment"
+                   "Loan - interest payment",
+                   cycle
                  ),
                {:ok, loan} <- Loan.make_payment(loan) do
             case Loan.paid_off?(loan) do
@@ -100,13 +108,13 @@ defmodule Bank do
     end
   end
 
-  def transfer(bank, debit_no, credit_no, amount, text \\ "")
-  def transfer(%Bank{} = bank, _, _, amount, _) when amount == 0, do: {:ok, bank}
+  def transfer(bank, debit_no, credit_no, amount, text \\ "", cycle \\ 0)
+  def transfer(%Bank{} = bank, _, _, amount, _, _) when amount == 0, do: {:ok, bank}
 
-  def transfer(%Bank{} = bank, debit_no, credit_no, amount, text) do
+  def transfer(%Bank{} = bank, debit_no, credit_no, amount, text, cycle) do
     with {:ok, bank} <- credit(bank, credit_no, amount),
          {:ok, bank} <- debit(bank, debit_no, amount),
-         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount, text) do
+         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount, text, cycle) do
       {:ok, bank}
     else
       {:error, _} = err -> err
@@ -206,6 +214,10 @@ defmodule Bank do
     {:ok, bank}
   end
 
+  def clear_transactions(%Bank{} = bank) do
+    %{bank | transactions: []}
+  end
+
   defp credit(%Bank{} = bank, account_no, amount) do
     with {:ok, ledger} <- get_ledger(bank, account_no),
          {:ok, ledger} <- Ledger.credit(ledger, account_no, amount) do
@@ -224,12 +236,19 @@ defmodule Bank do
     end
   end
 
-  defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount, text) do
+  defp register_transaction(%Bank{} = bank, deb_no, cred_no, amount, text, cycle) do
     {:ok,
      %{
        bank
        | transactions: [
-           %Transaction{deb_no: deb_no, cred_no: cred_no, amount: amount, text: text}
+           %Transaction{
+             bank: bank.name,
+             deb_no: deb_no,
+             cred_no: cred_no,
+             amount: amount,
+             text: text,
+             cycle: cycle
+           }
            | bank.transactions
          ]
      }}

@@ -10,6 +10,7 @@ defmodule BankAgent do
       owner_registry: %{},
       # a special set of employees that get a salary based on outstanding debt
       borrowers: []
+      # a reference to the current simulation
     ]
   end
 
@@ -28,6 +29,7 @@ defmodule BankAgent do
   def owner_registry(agent), do: state(agent).owner_registry
   def loan_registry(agent), do: state(agent).loan_registry
   def borrowers(agent), do: state(agent).borrowers
+  def simulation(agent), do: state(agent).simulation
 
   def has_debt?(agent, customer) do
     case get_loan(agent, customer) do
@@ -138,37 +140,37 @@ defmodule BankAgent do
     end
   end
 
-  def transfer(agent, from, to, amount, text \\ "")
+  def transfer(agent, from, to, amount, text \\ "", cycle \\ 0)
 
-  def transfer(agent, from_owner, to_owner, amount, text)
+  def transfer(agent, from_owner, to_owner, amount, text, cycle)
       when is_pid(from_owner) and is_pid(to_owner) and amount > 0 do
     with {:ok, from_no} <- get_account_no(agent, from_owner),
          {:ok, to_no} <- get_account_no(agent, to_owner) do
-      transfer(agent, from_no, to_no, amount, text)
+      transfer(agent, from_no, to_no, amount, text, cycle)
     else
       err -> err
     end
   end
 
-  def transfer(agent, from_owner, to_no, amount, text)
+  def transfer(agent, from_owner, to_no, amount, text, cycle)
       when is_pid(from_owner) and is_binary(to_no) do
     case get_account_no(agent, from_owner) do
-      {:ok, from_no} -> transfer(agent, from_no, to_no, amount, text)
+      {:ok, from_no} -> transfer(agent, from_no, to_no, amount, text, cycle)
       err -> err
     end
   end
 
-  def transfer(agent, from_no, to_owner, amount, text)
+  def transfer(agent, from_no, to_owner, amount, text, cycle)
       when is_binary(from_no) and is_pid(to_owner) do
     case get_account_no(agent, to_owner) do
-      {:ok, to_no} -> transfer(agent, from_no, to_no, amount, text)
+      {:ok, to_no} -> transfer(agent, from_no, to_no, amount, text, cycle)
       err -> err
     end
   end
 
-  def transfer(agent, from_no, to_no, amount, text)
+  def transfer(agent, from_no, to_no, amount, text, cycle)
       when is_binary(from_no) and is_binary(to_no) and amount > 0 do
-    case Bank.transfer(bank(agent), from_no, to_no, amount, text) do
+    case Bank.transfer(bank(agent), from_no, to_no, amount, text, cycle) do
       {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
       err -> err
     end
@@ -183,7 +185,7 @@ defmodule BankAgent do
     Agent.update(agent, fn x -> %{x | borrowers: borrowers} end)
   end
 
-  def evaluate(agent, _cycle) do
+  def evaluate(agent, cycle, simulation_id \\ "") do
     # fire borrowers who have paid their debts
     fire_borrowers(agent)
 
@@ -202,13 +204,16 @@ defmodule BankAgent do
             "interest_income",
             b,
             min(LoanPayment.total(payment), deposit),
-            "Borrower salary payment"
+            "Borrower salary payment",
+            cycle
           )
 
         false ->
           nil
       end
     end)
+
+    flush_cycle_data(agent, simulation_id)
   end
 
   defp register_account_ownership(agent, owner, account_no)
@@ -220,5 +225,17 @@ defmodule BankAgent do
           owner_registry: Map.put(x.owner_registry, account_no, owner)
       }
     end)
+  end
+
+  defp clear_transactions(agent) do
+    Agent.update(agent, fn x -> %{x | bank: Bank.clear_transactions(x.bank)} end)
+  end
+
+  defp flush_cycle_data(agent, simulation_id) do
+    Enum.each(bank(agent).transactions, fn t ->
+      FiveBells.Repo.insert(%{t | simulation_id: simulation_id})
+    end)
+
+    clear_transactions(agent)
   end
 end

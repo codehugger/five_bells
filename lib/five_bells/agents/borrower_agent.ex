@@ -33,7 +33,7 @@ defmodule BorrowerAgent do
   def interest_rate(agent), do: state(agent).interest_rate
   def borrower_window(agent), do: state(agent).borrower_window
 
-  def evaluate(agent, _cycle) do
+  def evaluate(agent, _cycle \\ nil, _simulation_id \\ nil) do
     case BankAgent.get_loan(bank(agent), agent) do
       {:ok, _loan} ->
         case BankAgent.pay_loan(bank(agent), agent) do

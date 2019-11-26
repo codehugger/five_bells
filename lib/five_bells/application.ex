@@ -9,6 +9,7 @@ defmodule FiveBells.Application do
     children = [
       # Starts a worker by calling: FiveBells.Worker.start_link(arg)
       # {FiveBells.Worker, arg}
+      FiveBells.Repo
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

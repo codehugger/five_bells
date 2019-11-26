@@ -15,6 +15,8 @@
 
 # Agent simulation
 
+{:ok, simulation} = SimulationAgent.start_link(simulation_id: "borrower")
+
 {:ok, bank} = BankAgent.start_link()
 
 {:ok, borrower1} =
@@ -32,13 +34,30 @@
 {:ok, borrower5} =
   BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
 
-Enum.each(1..20, fn cycle ->
-  BankAgent.evaluate(bank, cycle)
-  BorrowerAgent.evaluate(borrower1, cycle)
-  BorrowerAgent.evaluate(borrower2, cycle)
-  BorrowerAgent.evaluate(borrower3, cycle)
-  BorrowerAgent.evaluate(borrower4, cycle)
-  BorrowerAgent.evaluate(borrower5, cycle)
+# Enum.each(1..20, fn cycle ->
+#   BankAgent.evaluate(bank, cycle)
+#   BorrowerAgent.evaluate(borrower1, cycle)
+#   BorrowerAgent.evaluate(borrower2, cycle)
+#   BorrowerAgent.evaluate(borrower3, cycle)
+#   BorrowerAgent.evaluate(borrower4, cycle)
+#   BorrowerAgent.evaluate(borrower5, cycle)
+# end)
+
+Enum.each(1..20, fn _ ->
+  SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
+    BankAgent.evaluate(bank, cycle, simulation_id)
+    BorrowerAgent.evaluate(borrower1, cycle, simulation_id)
+    BorrowerAgent.evaluate(borrower2, cycle, simulation_id)
+    BorrowerAgent.evaluate(borrower3, cycle, simulation_id)
+    BorrowerAgent.evaluate(borrower4, cycle, simulation_id)
+    BorrowerAgent.evaluate(borrower5, cycle, simulation_id)
+
+    # indicate that the round went ok
+    :ok
+  end)
 end)
 
-IO.inspect(:sys.get_state(bank))
+IO.puts("Simulation finished!")
+IO.puts(SimulationAgent.simulation_id(simulation))
+
+# IO.inspect(:sys.get_state(bank))
