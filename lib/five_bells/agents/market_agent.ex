@@ -3,15 +3,21 @@ defmodule MarketAgent do
 
   defmodule State do
     defstruct [
-      :name,
       :bank,
       :account_no,
-      :supplier,
+      supplier: nil,
+      name: "Market",
+      bid_price: 1,
+      sell_price: 2,
+      min_spread: 1,
+      max_spread: 5,
       initial_deposit: 0,
       products_sold: 0,
+      products_bought: 0,
       products_sold_total: 0,
       current_cycle: 0,
       max_inventory: -1,
+      cash_buffer: 4,
       inventory: []
     ]
   end
@@ -34,10 +40,27 @@ defmodule MarketAgent do
   def bank(agent), do: state(agent).bank
   def supplier(agent), do: state(agent).supplier
   def inventory(agent), do: state(agent).inventory
+
+  def account_deposit(agent) do
+    case BankAgent.get_account_deposit(bank(agent), agent) do
+      {:ok, deposit} -> deposit
+      err -> err
+    end
+  end
+
+  def account_delta(agent) do
+    case BankAgent.get_account_delta(bank(agent), agent) do
+      {:ok, delta} -> delta
+      err -> err
+    end
+  end
+
   def current_cycle(agent), do: state(agent).current_cycle
   def products_sold(agent), do: state(agent).products_sold
+  def products_bought(agent), do: state(agent).products_bought
   def inventory_count(agent), do: length(inventory(agent))
   def max_inventory(agent), do: state(agent).max_inventory
+  def max_items(agent), do: max(max_inventory(agent) - inventory_count(agent), 3)
   def initial_deposit(agent), do: state(agent).initial_deposit
   def out_of_stock?(agent), do: length(inventory(agent)) <= 0
   def uses_inventory?(agent), do: max_inventory(agent) > 0
@@ -45,6 +68,14 @@ defmodule MarketAgent do
   def remaining_space(agent), do: max_inventory(agent) - inventory_count(agent)
   def quantity_available?(agent, quantity), do: inventory_count(agent) - quantity >= 0
   def discard_inventory?(agent), do: !uses_inventory?(agent)
+  def sell_price(agent), do: state(agent).sell_price
+  def bid_price(agent), do: state(agent).bid_price
+  def spread(agent), do: sell_price(agent) - bid_price(agent)
+  def max_spread(agent), do: max_spread(agent)
+  def min_spread(agent), do: min_spread(agent)
+  def available_cash(agent), do: account_deposit(agent) - max_inventory(agent) * bid_price(agent)
+  def cash_buffer(agent), do: state(agent).cash_buffer
+  def deposit_buffer(agent), do: account_deposit(agent) / cash_buffer(agent)
 
   def set_supplier(agent, supplier) when is_pid(supplier) do
     Agent.update(agent, fn x -> %{x | supplier: supplier} end)
@@ -58,9 +89,20 @@ defmodule MarketAgent do
     out_of_stock?(agent) && max_inventory(agent) - inventory_count(agent) > 0
   end
 
-  def reset_cycle(agent, cycle) do
-    adjust_prices(cycle)
+  def evaluate(agent, cycle, _simulation_id \\ "") do
+    # make the necessary price adjustments
+    # adjust spread if necessary
+    # reset cycle data
+    with :ok <- adjust_prices(agent),
+         :ok <- adjust_spread(agent),
+         :ok <- reset_cycle(agent, cycle) do
+      :ok
+    else
+      err -> err
+    end
+  end
 
+  def reset_cycle(agent, cycle) do
     # discard the inventory if required to do so
     inventory = if discard_inventory?(agent), do: [], else: inventory(agent)
 
@@ -76,7 +118,7 @@ defmodule MarketAgent do
   end
 
   def sell_to_customer(agent, customer, quantity \\ 1) when is_pid(customer) do
-    with :ok <- acquire_stock(agent, quantity),
+    with :ok <- acquire_inventory(agent, quantity),
          {:ok, _product} = result <- sell_products(agent, customer, quantity) do
       result
     else
@@ -86,7 +128,7 @@ defmodule MarketAgent do
 
   def price_to_customer(_agent), do: 1
 
-  def acquire_stock(agent, quantity) do
+  def acquire_inventory(agent, quantity) do
     case supplier(agent) do
       nil ->
         {:error, :no_supplier}
@@ -106,6 +148,11 @@ defmodule MarketAgent do
         end
     end
   end
+
+  def inventory_delta(agent), do: products_bought(agent) - products_sold(agent)
+  def inventory_growing?(agent), do: inventory_delta(agent) > 0
+  def inventory_shrinking?(agent), do: inventory_delta(agent) < 0
+  def inventory_unchanged?(agent), do: inventory_delta(agent) == 0
 
   #############################################################################
   # Private
@@ -155,8 +202,82 @@ defmodule MarketAgent do
     end
   end
 
-  defp adjust_prices(_cycle) do
-    IO.puts("Adjusting prices...")
+  defp adjust_prices(agent) do
+    cond do
+      # inventory is growing lower prices
+      inventory_growing?(agent) ->
+        lower_prices(agent)
+
+      # inventory is shrinking raise prices
+      inventory_shrinking?(agent) ->
+        raise_prices(agent)
+
+      # inventory is unchanged ... take special measures
+      inventory_unchanged?(agent) ->
+        cond do
+          # since we are probably unable to acquire inventory
+          # we raise the price in an attempt to seduce a provider
+          inventory_count(agent) == 0 -> raise_prices(agent)
+          # we have inventory but nothing is happening to it so
+          # lower prices in an attempt to get rid of some of it
+          true -> lower_prices(agent)
+        end
+    end
+  end
+
+  defp adjust_spread(agent) do
+    cond do
+      account_delta(agent) < 0 -> increase_spread(agent, 1)
+      true -> :ok
+    end
+  end
+
+  defp raise_prices(agent, amount \\ 1) when amount >= 1 do
+    case available_cash(agent) < deposit_buffer(agent) do
+      true ->
+        {:error, :prices_at_maximum}
+
+      false ->
+        Agent.update(agent, fn x ->
+          %{x | bid_price: x.bid_price + amount, sell_price: x.sell_price + amount}
+        end)
+    end
+  end
+
+  defp lower_prices(agent, amount \\ 1) when amount >= 1 do
+    case bid_price(agent) - amount < 1 do
+      true ->
+        {:error, :prices_at_minimum}
+
+      false ->
+        Agent.update(agent, fn x ->
+          %{x | bid_price: x.bid_price - amount, sell_price: x.sell_price - amount}
+        end)
+    end
+  end
+
+  defp increase_spread(agent, amount) do
+    cond do
+      spread(agent) + amount < max_spread(agent) ->
+        Agent.update(agent, fn x ->
+          %{x | spread: x.spread + amount, sell_price: x.bid_price * (x.spread + amount)}
+        end)
+
+      true ->
+        :ok
+    end
+  end
+
+  defp decrease_spread(agent, amount) do
+    cond do
+      spread(agent) - amount > min_spread(agent) ->
+        Agent.update(agent, fn x ->
+          %{x | spread: x.spread + amount, sell_price: x.bid_price * (x.spread - amount)}
+        end)
+
+      true ->
+        :ok
+    end
   end
 
   defp open_deposit_account(agent) do

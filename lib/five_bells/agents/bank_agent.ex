@@ -81,6 +81,20 @@ defmodule BankAgent do
     end
   end
 
+  def get_account_delta(agent, owner) when is_pid(owner) do
+    case get_account_no(agent, owner) do
+      {:ok, account_no} -> get_account_delta(agent, account_no)
+      err -> err
+    end
+  end
+
+  def get_account_delta(agent, account_no) when is_binary(account_no) do
+    case get_account(agent, account_no) do
+      {:ok, account} -> {:ok, account.delta}
+      err -> err
+    end
+  end
+
   def open_deposit_account(agent, owner, initial_deposit \\ 0)
       when is_pid(owner) and is_number(initial_deposit) do
     case Bank.open_deposit_account(bank(agent)) do
@@ -213,7 +227,12 @@ defmodule BankAgent do
       end
     end)
 
+    reset_cycle(agent, cycle, simulation_id)
+  end
+
+  def reset_cycle(agent, _cycle, simulation_id \\ "") do
     flush_cycle_data(agent, simulation_id)
+    reset_deltas(agent)
   end
 
   defp register_account_ownership(agent, owner, account_no)
@@ -237,5 +256,9 @@ defmodule BankAgent do
     end)
 
     clear_transactions(agent)
+  end
+
+  defp reset_deltas(agent) do
+    Agent.update(agent, fn x -> %{x | bank: Bank.reset_deltas(x.bank)} end)
   end
 end

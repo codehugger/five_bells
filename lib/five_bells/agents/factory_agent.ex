@@ -64,6 +64,14 @@ defmodule FactoryAgent do
     end
   end
 
+  def evaluate(agent, cycle, _simulation_id \\ "") do
+    with :ok <- reset_cycle(agent, cycle) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
   def reset_cycle(agent, cycle) do
     Agent.update(agent, fn x -> %{x | units_produced: 0, current_cycle: cycle} end)
   end

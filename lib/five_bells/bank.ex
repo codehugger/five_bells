@@ -218,6 +218,14 @@ defmodule Bank do
     %{bank | transactions: []}
   end
 
+  def reset_deltas(%Bank{} = bank) do
+    %{
+      bank
+      | ledgers:
+          Map.new(bank.ledgers, fn {name, ledger} -> {name, Ledger.reset_deltas(ledger)} end)
+    }
+  end
+
   defp credit(%Bank{} = bank, account_no, amount) do
     with {:ok, ledger} <- get_ledger(bank, account_no),
          {:ok, ledger} <- Ledger.credit(ledger, account_no, amount) do

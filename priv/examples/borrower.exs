@@ -43,7 +43,7 @@
 #   BorrowerAgent.evaluate(borrower5, cycle)
 # end)
 
-Enum.each(1..20, fn _ ->
+Enum.each(1..10, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
     BankAgent.evaluate(bank, cycle, simulation_id)
     BorrowerAgent.evaluate(borrower1, cycle, simulation_id)
@@ -60,4 +60,4 @@ end)
 IO.puts("Simulation finished!")
 IO.puts(SimulationAgent.simulation_id(simulation))
 
-# IO.inspect(:sys.get_state(bank))
+IO.inspect(:sys.get_state(bank))

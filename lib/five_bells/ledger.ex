@@ -37,6 +37,14 @@ defmodule Ledger do
     ledger |> post(account_no, amount)
   end
 
+  def reset_deltas(%Ledger{} = ledger) do
+    %{
+      ledger
+      | accounts:
+          Map.new(ledger.accounts, fn {name, account} -> {name, %{account | delta: 0}} end)
+    }
+  end
+
   defp polarity(%Ledger{} = ledger) do
     case @account_polarity[ledger.account_type] do
       nil -> 0
@@ -51,10 +59,21 @@ defmodule Ledger do
 
       account ->
         total_amount = account.deposit + amount * polarity(ledger)
+        delta = total_amount - account.deposit
 
         case total_amount < 0 do
-          true -> {:error, :insufficient_funds}
-          false -> {:ok, put_in(ledger.accounts[account_no].deposit, total_amount)}
+          true ->
+            {:error, :insufficient_funds}
+
+          false ->
+            {:ok,
+             %{
+               ledger
+               | accounts:
+                   Map.update!(ledger.accounts, account_no, fn acc ->
+                     %{acc | deposit: total_amount, delta: delta}
+                   end)
+             }}
         end
     end
   end

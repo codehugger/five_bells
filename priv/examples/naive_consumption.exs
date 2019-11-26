@@ -1,11 +1,12 @@
 # Banks and companies
+{:ok, simulation} = SimulationAgent.start_link(simulation_id: "naive_consumption")
 {:ok, bank} = BankAgent.start_link([])
 {:ok, factory} = FactoryAgent.start_link(bank: bank, initial_deposit: 0)
 {:ok, market} = MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 1)
 
 # People
 people =
-  Enum.map(1..50, fn x ->
+  Enum.map(1..5, fn x ->
     {:ok, person} =
       PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 10)
 
@@ -26,18 +27,21 @@ people =
 # [person | _] = people
 # PersonAgent.evaluate(person, 1)
 
-Enum.each(1..100, fn cycle ->
-  people
-  |> Enum.shuffle()
-  |> Enum.each(fn person ->
-    case PersonAgent.evaluate(person, cycle) do
-      {:error, _} -> false
-      _ -> true
-    end
-  end)
+Enum.each(1..10, fn _ ->
+  SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
+    people
+    |> Enum.shuffle()
+    |> Enum.each(fn person ->
+      case PersonAgent.evaluate(person, cycle) do
+        {:error, _} -> false
+        _ -> true
+      end
+    end)
 
-  MarketAgent.reset_cycle(market, cycle)
-  FactoryAgent.reset_cycle(factory, cycle)
+    MarketAgent.evaluate(market, cycle)
+    FactoryAgent.evaluate(factory, cycle)
+    BankAgent.evaluate(bank, cycle, simulation_id)
+  end)
 end)
 
 IO.puts("")
