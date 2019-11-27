@@ -47,6 +47,16 @@ defmodule Ledger do
     }
   end
 
+  def get_deposit_total(%Ledger{} = ledger) do
+    Enum.reduce(ledger.accounts, 0, fn {_acc_no, acc}, sum -> sum + acc.deposit end)
+  end
+
+  # TODO: loans need to be moved under accounts before attempting this!!!
+  # def total(%Ledger{} = ledger) do
+  #   case {ledger.ledger_type, ledger.account_type} do
+  #   end
+  # end
+
   defp polarity(%Ledger{} = ledger) do
     case @account_polarity[ledger.account_type] do
       nil -> 0
@@ -74,7 +84,7 @@ defmodule Ledger do
                | delta: ledger.delta + delta,
                  accounts:
                    Map.update!(ledger.accounts, account_no, fn acc ->
-                     %{acc | deposit: total_amount, delta: delta}
+                     %{acc | deposit: total_amount, delta: acc.delta + delta}
                    end)
              }}
         end

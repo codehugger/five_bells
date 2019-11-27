@@ -29,7 +29,7 @@ defmodule PersonAgent do
   def account_no(agent), do: BankAgent.get_account_no(bank(agent), agent)
 
   def consume(agent, product) do
-    IO.puts("#{state(agent).name} consumed #{inspect(product)}")
+    # IO.puts("#{state(agent).name} consumed #{inspect(product)}")
     Agent.update(agent, fn x -> %{x | consumed: [product | x.consumed]} end)
   end
 
@@ -39,27 +39,27 @@ defmodule PersonAgent do
 
     cond do
       deposit < price ->
-        IO.puts("#{name(agent)} cannot afford product at price #{price}")
+        # IO.puts("#{name(agent)} cannot afford product at price #{price}")
         {:error, :cannot_afford_product}
 
       deposit == 0 ->
-        IO.puts("#{name(agent)} has no funds")
+        # IO.puts("#{name(agent)} has no funds")
         {:error, :no_funds}
 
       true ->
         case MarketAgent.sell_to_customer(market(agent), agent) do
-          {:ok, product} = resp ->
-            IO.puts("#{name(agent)} bought #{inspect(product)} at #{price}")
+          {:ok, _product} = resp ->
+            # IO.puts("#{name(agent)} bought #{inspect(product)} at #{price}")
             resp
 
-          {:error, reason} = err ->
-            IO.puts("#{name(agent)} unable to acquired product from market #{inspect(reason)}")
+          {:error, _reason} = err ->
+            # IO.puts("#{name(agent)} unable to acquired product from market #{inspect(reason)}")
             err
         end
     end
   end
 
-  def evaluate(agent, _cycle) do
+  def evaluate(agent, _cycle, _simulation_id) do
     case purchase(agent) do
       {:ok, product} ->
         consume(agent, product)

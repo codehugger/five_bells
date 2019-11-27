@@ -1,17 +1,28 @@
+import Ecto.Query, only: [from: 2]
+
 # Banks and companies
 {:ok, simulation} = SimulationAgent.start_link(simulation_id: "naive_consumption")
 {:ok, bank} = BankAgent.start_link([])
-{:ok, factory} = FactoryAgent.start_link(bank: bank, initial_deposit: 0)
-{:ok, market} = MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 1)
+{:ok, factory} = FactoryAgent.start_link(bank: bank, initial_deposit: 10, output: 10)
+
+{:ok, market} =
+  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 10, max_inventory: 10)
 
 # People
 people =
-  Enum.map(1..5, fn x ->
+  Enum.map(1..20, fn x ->
     {:ok, person} =
       PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 10)
 
     person
   end)
+
+# clear simulation data before starting
+from(t in Repo.TimeSeries, where: t.simulation_id == "naive_consumption")
+|> FiveBells.Repo.delete_all()
+
+from(t in Repo.Transaction, where: t.simulation_id == "naive_consumption")
+|> FiveBells.Repo.delete_all()
 
 # Sanity tests
 # IO.inspect(BankAgent.state())
@@ -27,59 +38,59 @@ people =
 # [person | _] = people
 # PersonAgent.evaluate(person, 1)
 
-Enum.each(1..10, fn _ ->
+Enum.each(1..20, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
     people
     |> Enum.shuffle()
     |> Enum.each(fn person ->
-      case PersonAgent.evaluate(person, cycle) do
+      case PersonAgent.evaluate(person, cycle, simulation_id) do
         {:error, _} -> false
         _ -> true
       end
     end)
 
-    MarketAgent.evaluate(market, cycle)
-    FactoryAgent.evaluate(factory, cycle)
+    MarketAgent.evaluate(market, cycle, simulation_id)
+    FactoryAgent.evaluate(factory, cycle, simulation_id)
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)
 end)
 
-IO.puts("")
-IO.puts("################################################################################")
-IO.puts("SUMMARY")
-IO.puts("################################################################################")
-IO.puts("")
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("BANKS")
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("")
-IO.inspect(:sys.get_state(bank))
-IO.puts("")
+# IO.puts("")
+# IO.puts("################################################################################")
+# IO.puts("SUMMARY")
+# IO.puts("################################################################################")
+# IO.puts("")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("BANKS")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("")
+# IO.inspect(:sys.get_state(bank))
+# IO.puts("")
 
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("FACTORIES")
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("")
-IO.inspect(:sys.get_state(factory))
-IO.inspect(BankAgent.get_account(bank, factory))
-IO.puts("")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("FACTORIES")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("")
+# IO.inspect(:sys.get_state(factory))
+# IO.inspect(BankAgent.get_account(bank, factory))
+# IO.puts("")
 
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("MARKETS")
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("")
-IO.inspect(:sys.get_state(market))
-IO.inspect(BankAgent.get_account(bank, market))
-IO.puts("")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("MARKETS")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("")
+# IO.inspect(:sys.get_state(market))
+# IO.inspect(BankAgent.get_account(bank, market))
+# IO.puts("")
 
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("PEOPLE")
-IO.puts("--------------------------------------------------------------------------------")
-IO.puts("")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("PEOPLE")
+# IO.puts("--------------------------------------------------------------------------------")
+# IO.puts("")
 
-Enum.each(people, fn x ->
-  IO.inspect(:sys.get_state(x))
-  IO.inspect(BankAgent.get_account(bank, x))
-end)
+# Enum.each(people, fn x ->
+#   IO.inspect(:sys.get_state(x))
+#   IO.inspect(BankAgent.get_account(bank, x))
+# end)
 
-IO.puts("")
+# IO.puts("")

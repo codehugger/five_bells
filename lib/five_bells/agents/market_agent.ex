@@ -11,6 +11,7 @@ defmodule MarketAgent do
       sell_price: 2,
       min_spread: 1,
       max_spread: 5,
+      spread: 4,
       initial_deposit: 0,
       products_sold: 0,
       products_bought: 0,
@@ -57,6 +58,7 @@ defmodule MarketAgent do
 
   def current_cycle(agent), do: state(agent).current_cycle
   def products_sold(agent), do: state(agent).products_sold
+  def products_sold_total(agent), do: state(agent).products_sold_total
   def products_bought(agent), do: state(agent).products_bought
   def inventory_count(agent), do: length(inventory(agent))
   def max_inventory(agent), do: state(agent).max_inventory
@@ -70,7 +72,7 @@ defmodule MarketAgent do
   def discard_inventory?(agent), do: !uses_inventory?(agent)
   def sell_price(agent), do: state(agent).sell_price
   def bid_price(agent), do: state(agent).bid_price
-  def spread(agent), do: sell_price(agent) - bid_price(agent)
+  def spread(agent), do: state(agent).spread
   def max_spread(agent), do: max_spread(agent)
   def min_spread(agent), do: min_spread(agent)
   def available_cash(agent), do: account_deposit(agent) - max_inventory(agent) * bid_price(agent)
@@ -89,12 +91,15 @@ defmodule MarketAgent do
     out_of_stock?(agent) && max_inventory(agent) - inventory_count(agent) > 0
   end
 
-  def evaluate(agent, cycle, _simulation_id \\ "") do
+  def evaluate(agent, cycle, simulation_id \\ "") do
+    # record the state of inventory and prices
     # make the necessary price adjustments
     # adjust spread if necessary
     # reset cycle data
-    with :ok <- adjust_prices(agent),
+    with :ok <- flush_statistics(agent, cycle, simulation_id),
+         :ok <- adjust_prices(agent),
          :ok <- adjust_spread(agent),
+         :ok <- acquire_inventory(agent),
          :ok <- reset_cycle(agent, cycle) do
       :ok
     else
@@ -102,7 +107,7 @@ defmodule MarketAgent do
     end
   end
 
-  def reset_cycle(agent, cycle) do
+  defp reset_cycle(agent, cycle) do
     # discard the inventory if required to do so
     inventory = if discard_inventory?(agent), do: [], else: inventory(agent)
 
@@ -110,11 +115,104 @@ defmodule MarketAgent do
       %{
         x
         | products_sold: 0,
-          products_sold_total: x.products_sold_total + x.products_sold,
           current_cycle: cycle,
           inventory: inventory
       }
     end)
+  end
+
+  def flush_statistics(agent, cycle, simulation_id) do
+    with :ok <- flush_price_statistics(agent, cycle, simulation_id),
+         :ok <- flush_inventory_statistics(agent, cycle, simulation_id) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  def flush_price_statistics(agent, cycle, simulation_id) do
+    market = state(agent)
+
+    with {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.sell_price.#{market.name}",
+               market.sell_price,
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.bid_price.#{market.name}",
+               market.bid_price,
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.spread.#{market.name}",
+               spread(agent),
+               cycle,
+               simulation_id
+             )
+           ) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  def flush_inventory_statistics(agent, cycle, simulation_id) do
+    market = state(agent)
+
+    with {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.products_sold.#{market.name}",
+               products_sold(agent),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.products_sold_total.#{market.name}",
+               products_sold_total(agent),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.products_bought.#{market.name}",
+               products_bought(agent),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               "market.inventory_count.#{market.name}",
+               inventory_count(agent),
+               cycle,
+               simulation_id
+             )
+           ) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  defp create_time_series_entry(label, value, cycle, simulation_id) do
+    %Repo.TimeSeries{label: label, value: value, cycle: cycle, simulation_id: simulation_id}
   end
 
   def sell_to_customer(agent, customer, quantity \\ 1) when is_pid(customer) do
@@ -128,6 +226,8 @@ defmodule MarketAgent do
 
   def price_to_customer(_agent), do: 1
 
+  def acquire_inventory(agent), do: acquire_inventory(agent, max_items(agent))
+
   def acquire_inventory(agent, quantity) do
     case supplier(agent) do
       nil ->
@@ -136,7 +236,8 @@ defmodule MarketAgent do
       supplier ->
         case needs_to_restock?(agent) || uses_inventory?(agent) == false do
           true ->
-            with {:ok, products} <- FactoryAgent.sell_to_customer(supplier, agent, quantity),
+            with {:ok, products} <-
+                   FactoryAgent.sell_to_customer(supplier, agent, quantity),
                  :ok <- add_to_inventory(agent, products) do
               :ok
             else
@@ -169,7 +270,11 @@ defmodule MarketAgent do
             case remove_from_inventory(agent, quantity) do
               {:ok, products} = result ->
                 Agent.update(agent, fn x ->
-                  %{x | products_sold: x.products_sold + length(products)}
+                  %{
+                    x
+                    | products_sold: x.products_sold + length(products),
+                      products_sold_total: x.products_sold_total + length(products)
+                  }
                 end)
 
                 result

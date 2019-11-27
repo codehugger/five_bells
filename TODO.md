@@ -4,14 +4,13 @@
 
 ### Dump stats
 
+MOVE LOANS UNDER ACCOUNTS FOR THE LEDGER TOTALS TO BE POSSIBLE!!!
+
 - Dump on cycle reset
-  - account deposit and delta
-  - ledger totals
   - bank totals
+  - ledger totals
   - factory prices
-  - market prices
   - factory inventory
-  - market inventory
   - employment (total number of population that has an employer)
 
 ### Factory (pushing its products)

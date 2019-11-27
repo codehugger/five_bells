@@ -1,3 +1,5 @@
+import Ecto.Query, only: [from: 2]
+
 # Non-agent version
 
 # {:ok, bank} = %Bank{} |> Bank.init_customer_bank_ledgers()
@@ -43,6 +45,13 @@
 #   BorrowerAgent.evaluate(borrower5, cycle)
 # end)
 
+# clear simulation data before starting
+from(t in Repo.TimeSeries, where: t.simulation_id == "borrower")
+|> FiveBells.Repo.delete_all()
+
+from(t in Repo.Transaction, where: t.simulation_id == "borrower")
+|> FiveBells.Repo.delete_all()
+
 Enum.each(1..10, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
     BankAgent.evaluate(bank, cycle, simulation_id)
@@ -57,7 +66,7 @@ Enum.each(1..10, fn _ ->
   end)
 end)
 
-IO.puts("Simulation finished!")
-IO.puts(SimulationAgent.simulation_id(simulation))
+# IO.puts("Simulation finished!")
+# IO.puts(SimulationAgent.simulation_id(simulation))
 
-IO.inspect(:sys.get_state(bank))
+# IO.inspect(:sys.get_state(bank))

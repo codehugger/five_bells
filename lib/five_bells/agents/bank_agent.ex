@@ -15,7 +15,7 @@ defmodule BankAgent do
   end
 
   def start_link(args \\ []) do
-    case Bank.init_customer_bank_ledgers(%Bank{}) do
+    case Bank.init_customer_bank_ledgers(struct(Bank, args)) do
       {:ok, bank} -> Agent.start_link(fn -> struct(State, [bank: bank] ++ args) end)
       err -> err
     end
@@ -226,39 +226,112 @@ defmodule BankAgent do
       end
     end)
 
+    # flush cycle statistics like transactions
+    flush_statistics(agent, cycle, simulation_id)
+
+    # flush transactions to db
+    flush_transactions(agent, cycle, simulation_id)
+
     # reset all cycle data
     reset_cycle(agent, cycle, simulation_id)
   end
 
-  defp reset_cycle(agent, cycle, simulation_id) do
-    flush_cycle_data(agent, cycle, simulation_id)
+  defp reset_cycle(agent, _cycle, _simulation_id) do
     reset_deltas(agent)
   end
 
-  defp register_account_ownership(agent, owner, account_no)
-       when is_pid(owner) and is_binary(account_no) do
-    Agent.update(agent, fn x ->
-      %{
-        x
-        | account_registry: Map.put(x.account_registry, owner, account_no),
-          owner_registry: Map.put(x.owner_registry, account_no, owner)
-      }
+  defp flush_statistics(agent, cycle, simulation_id) do
+    # banks (deposits, loans)
+    flush_bank_statistics(agent, cycle, simulation_id)
+
+    # accounts (delta, total)
+    flush_account_statistics(agent, cycle, simulation_id)
+
+    # ledgers (delta, total)
+    flush_ledger_statistics(agent, cycle, simulation_id)
+
+    # loans (capital/interest -> paid/unpaid)
+    # flush_loan_statistics(agent, cycle, simulation_id)
+  end
+
+  defp flush_bank_statistics(agent, cycle, simulation_id) do
+    bank = bank(agent)
+
+    # total deposits
+    FiveBells.Repo.insert(%Repo.TimeSeries{
+      label: "bank.total_deposit.#{bank.bank_no}",
+      value: Bank.total_deposits(bank),
+      cycle: cycle,
+      simulation_id: simulation_id
+    })
+
+    # total loan capital
+    FiveBells.Repo.insert(%Repo.TimeSeries{
+      label: "bank.total_outstanding_capital.#{bank.bank_no}",
+      value: Bank.total_outstanding_capital(bank),
+      cycle: cycle,
+      simulation_id: simulation_id
+    })
+  end
+
+  defp flush_ledger_statistics(agent, cycle, simulation_id) do
+    bank = bank(agent)
+
+    Enum.each(bank.ledgers, fn {ledger_name, ledger} ->
+      FiveBells.Repo.insert(%Repo.TimeSeries{
+        label: "ledger.delta.#{bank.bank_no}-#{ledger_name}",
+        value: ledger.delta,
+        cycle: cycle,
+        simulation_id: simulation_id
+      })
+
+      # TODO: fix the ledger->account->loan situation!!!
+      # FiveBells.Repo.insert(%Repo.TimeSeries{
+      #   label: "ledger.total.#{bank.bank_no}-#{ledger_name}",
+      #   value: -1,
+      #   cycle: cycle,
+      #   simulation_id: simulation_id
+      # })
     end)
   end
 
-  defp flush_cycle_data(agent, cycle, simulation_id) do
-    # dump all bank data to time series table(s)
-    flush_statistics(agent, cycle, simulation_id)
+  defp flush_account_statistics(agent, cycle, simulation_id) do
+    bank = bank(agent)
 
-    # store transactions
-    flush_transactions(agent, cycle, simulation_id)
+    Enum.each(bank.ledgers, fn {ledger_name, ledger} ->
+      # Store account deltas
+      FiveBells.Repo.insert_all(
+        Repo.TimeSeries,
+        Enum.map(ledger.accounts, fn {account_no, account} ->
+          %{
+            label: "account.delta.#{bank.bank_no}-#{ledger_name}-#{account_no}",
+            value: account.delta,
+            cycle: cycle,
+            simulation_id: simulation_id
+          }
+        end)
+      )
+
+      # Store account deposits
+      FiveBells.Repo.insert_all(
+        Repo.TimeSeries,
+        Enum.map(ledger.accounts, fn {account_no, account} ->
+          %{
+            label: "account.deposit.#{bank.bank_no}-#{ledger_name}-#{account_no}",
+            value: account.deposit,
+            cycle: cycle,
+            simulation_id: simulation_id
+          }
+        end)
+      )
+    end)
   end
 
-  defp flush_statistics(agent, _cycle, _simulation_id) do
-    # ledgers (delta, total)
-    # accounts (delta, total)
-    # loans (capital/interest -> paid/unpaid)
-    reset_deltas(agent)
+  defp flush_loan_statistics(agent, cycle, simulation_id) do
+    Enum.each(bank(agent).unpaid_loans, fn {_account_no, loan} ->
+      nil
+      # IO.inspect(loan)
+    end)
   end
 
   defp flush_transactions(agent, cycle, simulation_id) do
@@ -281,5 +354,16 @@ defmodule BankAgent do
 
   defp reset_deltas(agent) do
     Agent.update(agent, fn x -> %{x | bank: Bank.reset_deltas(x.bank)} end)
+  end
+
+  defp register_account_ownership(agent, owner, account_no)
+       when is_pid(owner) and is_binary(account_no) do
+    Agent.update(agent, fn x ->
+      %{
+        x
+        | account_registry: Map.put(x.account_registry, owner, account_no),
+          owner_registry: Map.put(x.owner_registry, account_no, owner)
+      }
+    end)
   end
 end

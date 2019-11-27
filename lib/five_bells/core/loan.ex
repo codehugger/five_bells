@@ -67,6 +67,10 @@ defmodule Loan do
     end
   end
 
+  def outstanding_capital(%Loan{} = loan) do
+    Enum.reduce(loan.payments_remaining, 0, fn p, sum -> sum + p.capital end)
+  end
+
   defp add_baloon_payment(%Loan{} = loan) do
     capital_sum = Enum.reduce(loan.payments_remaining, 0, fn x, acc -> acc + x.capital end)
     [last | tail] = Enum.reverse(loan.payments_remaining)

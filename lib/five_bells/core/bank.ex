@@ -1,6 +1,7 @@
 defmodule Bank do
   defstruct [
     :central_bank,
+    bank_no: "0001",
     name: "Bank",
     ledgers: %{},
     unpaid_loans: %{},
@@ -224,6 +225,22 @@ defmodule Bank do
       | ledgers:
           Map.new(bank.ledgers, fn {name, ledger} -> {name, Ledger.reset_deltas(ledger)} end)
     }
+  end
+
+  def total_deposits(%Bank{} = bank) do
+    case bank.ledgers["deposit"] do
+      nil ->
+        {:error, :no_deposit_ledger}
+
+      ledger ->
+        Ledger.get_deposit_total(ledger)
+    end
+  end
+
+  def total_outstanding_capital(%Bank{} = bank) do
+    Enum.reduce(bank.unpaid_loans, 0, fn {_acc_no, loan}, sum ->
+      sum + Loan.outstanding_capital(loan)
+    end)
   end
 
   defp credit(%Bank{} = bank, account_no, amount) do
