@@ -5,7 +5,8 @@ defmodule Ledger do
     :name,
     ledger_type: "cash",
     account_type: "asset",
-    accounts: %{}
+    accounts: %{},
+    delta: 0
   ]
 
   def add_account(%Ledger{} = ledger), do: add_account(ledger, nil)
@@ -40,7 +41,8 @@ defmodule Ledger do
   def reset_deltas(%Ledger{} = ledger) do
     %{
       ledger
-      | accounts:
+      | delta: 0,
+        accounts:
           Map.new(ledger.accounts, fn {name, account} -> {name, %{account | delta: 0}} end)
     }
   end
@@ -69,7 +71,8 @@ defmodule Ledger do
             {:ok,
              %{
                ledger
-               | accounts:
+               | delta: ledger.delta + delta,
+                 accounts:
                    Map.update!(ledger.accounts, account_no, fn acc ->
                      %{acc | deposit: total_amount, delta: delta}
                    end)

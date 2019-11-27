@@ -7,6 +7,18 @@
 
 ## v0.4
 
+### Dump stats
+
+- Dump on cycle reset
+  - account deposit and delta
+  - ledger totals
+  - bank totals
+  - factory prices
+  - market prices
+  - factory inventory
+  - market inventory
+  - employment (total number of population that has an employer)
+
 ### Factory (pushing its products)
 
 - Factory determines output (workers, resources etc.)

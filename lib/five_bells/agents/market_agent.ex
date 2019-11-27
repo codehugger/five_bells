@@ -256,28 +256,18 @@ defmodule MarketAgent do
     end
   end
 
-  defp increase_spread(agent, amount) do
-    cond do
-      spread(agent) + amount < max_spread(agent) ->
-        Agent.update(agent, fn x ->
-          %{x | spread: x.spread + amount, sell_price: x.bid_price * (x.spread + amount)}
-        end)
-
-      true ->
-        :ok
-    end
+  def increase_spread(agent, amount) do
+    Agent.update(agent, fn x ->
+      spread = min(x.max_spread, x.spread + amount)
+      %{x | spread: spread, sell_price: x.bid_price * spread}
+    end)
   end
 
   defp decrease_spread(agent, amount) do
-    cond do
-      spread(agent) - amount > min_spread(agent) ->
-        Agent.update(agent, fn x ->
-          %{x | spread: x.spread + amount, sell_price: x.bid_price * (x.spread - amount)}
-        end)
-
-      true ->
-        :ok
-    end
+    Agent.update(agent, fn x ->
+      spread = max(x.min_spread, x.spread - amount)
+      %{x | spread: spread, sell_price: x.bid_price * spread}
+    end)
   end
 
   defp open_deposit_account(agent) do
