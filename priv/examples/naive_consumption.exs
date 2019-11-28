@@ -3,10 +3,20 @@ import Ecto.Query, only: [from: 2]
 # Banks and companies
 {:ok, simulation} = SimulationAgent.start_link(simulation_id: "naive_consumption")
 {:ok, bank} = BankAgent.start_link([])
-{:ok, factory} = FactoryAgent.start_link(bank: bank, initial_deposit: 10, output: 10)
+
+{:ok, factory} =
+  FactoryAgent.start_link(
+    bank: bank,
+    initial_deposit: 100,
+    output: 10,
+    max_inventory: 10,
+    initiate_sale: true
+  )
 
 {:ok, market} =
-  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 10, max_inventory: 10)
+  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 100, max_inventory: 10)
+
+:ok = FactoryAgent.set_market(factory, market)
 
 # People
 people =
@@ -38,8 +48,13 @@ from(t in Repo.Transaction, where: t.simulation_id == "naive_consumption")
 # [person | _] = people
 # PersonAgent.evaluate(person, 1)
 
-Enum.each(1..20, fn _ ->
+Enum.each(1..2, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
+    # let the market and the factories try to trade products before
+    # letting people have a go at buying
+    MarketAgent.evaluate(market, cycle, simulation_id)
+    FactoryAgent.evaluate(factory, cycle, simulation_id)
+
     people
     |> Enum.shuffle()
     |> Enum.each(fn person ->
@@ -49,8 +64,6 @@ Enum.each(1..20, fn _ ->
       end
     end)
 
-    MarketAgent.evaluate(market, cycle, simulation_id)
-    FactoryAgent.evaluate(factory, cycle, simulation_id)
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)
 end)

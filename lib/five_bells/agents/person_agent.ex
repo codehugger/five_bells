@@ -35,7 +35,7 @@ defmodule PersonAgent do
 
   def purchase(agent) do
     {:ok, deposit} = account_deposit(agent)
-    price = MarketAgent.price_to_customer(market(agent))
+    price = MarketAgent.sell_price(market(agent))
 
     cond do
       deposit < price ->

@@ -7,3 +7,5 @@ config :five_bells, FiveBells.Repo,
   hostname: "localhost"
 
 config :five_bells, ecto_repos: [FiveBells.Repo]
+
+config :logger, level: :info

@@ -1,5 +1,6 @@
 defmodule MarketAgent do
   use Agent
+  import Logger
 
   defmodule State do
     defstruct [
@@ -19,7 +20,8 @@ defmodule MarketAgent do
       current_cycle: 0,
       max_inventory: -1,
       cash_buffer: 4,
-      inventory: []
+      inventory: [],
+      initiates_purchase: false
     ]
   end
 
@@ -77,7 +79,15 @@ defmodule MarketAgent do
   def min_spread(agent), do: min_spread(agent)
   def available_cash(agent), do: account_deposit(agent) - max_inventory(agent) * bid_price(agent)
   def cash_buffer(agent), do: state(agent).cash_buffer
-  def deposit_buffer(agent), do: account_deposit(agent) / cash_buffer(agent)
+  def deposit_buffer(agent), do: round(account_deposit(agent) / cash_buffer(agent))
+  def initiates_purchase?(agent), do: state(agent).initiates_purchase
+
+  def purchase_capacity(agent) do
+    # here there are two main things to consider
+    # 1. how many do we want and have storage for?
+    # 2. how many can we afford?
+    min(max_items(agent), round(available_cash(agent) / bid_price(agent)))
+  end
 
   def set_supplier(agent, supplier) when is_pid(supplier) do
     Agent.update(agent, fn x -> %{x | supplier: supplier} end)
@@ -88,22 +98,35 @@ defmodule MarketAgent do
   end
 
   def needs_to_restock?(agent) do
-    out_of_stock?(agent) && max_inventory(agent) - inventory_count(agent) > 0
+    # here we need to consider the following
+    # 1. do we keep an inventory at all?
+    # 2. do we initiate purchases or do we wait for the supplier?
+    # 3. are we out of stock?
+    # 4. can we afford to buy more stock?
+    case uses_inventory?(agent) && initiates_purchase?(agent) do
+      true ->
+        out_of_stock?(agent) && max_inventory(agent) - inventory_count(agent) > 0
+
+      false ->
+        false
+    end
   end
 
   def evaluate(agent, cycle, simulation_id \\ "") do
-    # record the state of inventory and prices
     # make the necessary price adjustments
     # adjust spread if necessary
+    # record the state of inventory and prices
     # reset cycle data
-    with :ok <- flush_statistics(agent, cycle, simulation_id),
+    with :ok <- acquire_inventory(agent),
          :ok <- adjust_prices(agent),
          :ok <- adjust_spread(agent),
-         :ok <- acquire_inventory(agent),
+         :ok <- flush_statistics(agent, cycle, simulation_id),
          :ok <- reset_cycle(agent, cycle) do
       :ok
     else
-      err -> err
+      err ->
+        Logger.error("Market is having problems: #{inspect(err)}")
+        err
     end
   end
 
@@ -216,37 +239,36 @@ defmodule MarketAgent do
   end
 
   def sell_to_customer(agent, customer, quantity \\ 1) when is_pid(customer) do
+    # the main things to consider here are
+    # 1. do we have the requested quantity
+    # 2. are we willing to go and buy to meet the quantity requirement
     with :ok <- acquire_inventory(agent, quantity),
-         {:ok, _product} = result <- sell_products(agent, customer, quantity) do
+         {:ok, _products} = result <- sell_products(agent, customer, quantity) do
       result
     else
       err -> err
     end
   end
 
-  def price_to_customer(_agent), do: 1
+  def receive_delivery(agent, products) do
+    add_to_inventory(agent, products)
+  end
 
-  def acquire_inventory(agent), do: acquire_inventory(agent, max_items(agent))
+  def acquire_inventory(agent), do: acquire_inventory(agent, purchase_capacity(agent))
 
   def acquire_inventory(agent, quantity) do
-    case supplier(agent) do
-      nil ->
-        {:error, :no_supplier}
-
-      supplier ->
-        case needs_to_restock?(agent) || uses_inventory?(agent) == false do
-          true ->
-            with {:ok, products} <-
-                   FactoryAgent.sell_to_customer(supplier, agent, quantity),
-                 :ok <- add_to_inventory(agent, products) do
-              :ok
-            else
-              err -> err
-            end
-
-          false ->
-            :ok
+    # things to consider
+    # 1. do we need to restock? (do we keep an inventory?)
+    # 2. do we have a supplier?
+    case needs_to_restock?(agent) do
+      true ->
+        case supplier(agent) do
+          nil -> {:error, :no_supplier}
+          supplier -> FactoryAgent.sell_to_customer(supplier, agent, quantity)
         end
+
+      false ->
+        :ok
     end
   end
 
@@ -260,12 +282,22 @@ defmodule MarketAgent do
   #############################################################################
 
   defp sell_products(agent, customer, quantity) do
+    # the things to consider here are
+    # 1. do we have the given quantity in inventory
+    # 2. did the transfer from the customer go through?
+    # 3. were we able to hand over the requsted products?
     case quantity_available?(agent, quantity) do
       false ->
         {:error, {:not_enough_stock, [available: inventory_count(agent), requested: quantity]}}
 
       true ->
-        case BankAgent.transfer(bank(agent), customer, agent, quantity) do
+        case BankAgent.transfer(
+               bank(agent),
+               customer,
+               agent,
+               quantity * sell_price(agent),
+               "Product purchase"
+             ) do
           :ok ->
             case remove_from_inventory(agent, quantity) do
               {:ok, products} = result ->
@@ -280,6 +312,14 @@ defmodule MarketAgent do
                 result
 
               err ->
+                BankAgent.transfer(
+                  customer,
+                  bank(agent),
+                  agent,
+                  quantity * sell_price(agent),
+                  "Refund product purchase"
+                )
+
                 err
             end
 
@@ -338,27 +378,22 @@ defmodule MarketAgent do
   end
 
   defp raise_prices(agent, amount \\ 1) when amount >= 1 do
-    case available_cash(agent) < deposit_buffer(agent) do
-      true ->
-        {:error, :prices_at_maximum}
-
-      false ->
+    # when raising prices we have to be careful to never go above the limit at which we can buy
+    cond do
+      available_cash(agent) < deposit_buffer(agent) ->
         Agent.update(agent, fn x ->
           %{x | bid_price: x.bid_price + amount, sell_price: x.sell_price + amount}
         end)
+
+      true ->
+        :ok
     end
   end
 
   defp lower_prices(agent, amount \\ 1) when amount >= 1 do
-    case bid_price(agent) - amount < 1 do
-      true ->
-        {:error, :prices_at_minimum}
-
-      false ->
-        Agent.update(agent, fn x ->
-          %{x | bid_price: x.bid_price - amount, sell_price: x.sell_price - amount}
-        end)
-    end
+    Agent.update(agent, fn x ->
+      %{x | bid_price: min(x.bid_price - amount, 1), sell_price: min(x.sell_price - amount, 1)}
+    end)
   end
 
   def increase_spread(agent, amount) do
