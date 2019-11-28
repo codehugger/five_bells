@@ -1,6 +1,6 @@
 defmodule FactoryAgent do
   use Agent
-  import Logger
+  require Logger
 
   defmodule State do
     defstruct [
@@ -23,6 +23,12 @@ defmodule FactoryAgent do
     ]
   end
 
+  def state(agent), do: Agent.get(agent, & &1)
+
+  #############################################################################
+  # Simulation
+  #############################################################################
+
   def start_link(args \\ 0) do
     case Agent.start_link(fn -> struct(State, args) end) do
       {:ok, agent} = resp ->
@@ -38,6 +44,35 @@ defmodule FactoryAgent do
 
   def stop(agent), do: Agent.stop(agent)
 
+  def evaluate(agent, cycle, simulation_id \\ "") do
+    # record the state of production
+    # reset cycle data
+    with :ok <- produce(agent),
+         :ok <- sell_to_market(agent),
+         :ok <- flush_statistics(agent, cycle, simulation_id),
+         # :ok <- pay_salaries(agent, cycle, simulation_id),
+         # :ok <- hire_fire_employees(agent, cycle, simulation_id),
+         :ok <- discard_inventory(agent),
+         :ok <- reset_cycle(agent, cycle) do
+      :ok
+    else
+      err ->
+        Logger.error("Factory is having problems: #{inspect(err)}")
+        err
+    end
+  end
+
+  def reset_cycle(agent, cycle) do
+    Agent.update(agent, fn x -> %{x | units_produced: 0, units_sold: 0, current_cycle: cycle} end)
+  end
+
+  #############################################################################
+  # Funds
+  #############################################################################
+
+  defp bank(agent), do: state(agent).bank
+  defp initial_deposit(agent), do: state(agent).initial_deposit
+
   def account_deposit(agent) do
     case BankAgent.get_account_deposit(bank(agent), agent) do
       {:ok, deposit} -> deposit
@@ -45,26 +80,33 @@ defmodule FactoryAgent do
     end
   end
 
-  def state(agent), do: Agent.get(agent, & &1)
-  def bank(agent), do: state(agent).bank
-  def recipe(agent), do: state(agent).recipe
-  def inventory(agent), do: state(agent).inventory
-  def inventory_count(agent), do: length(state(agent).inventory)
-  def max_inventory(agent), do: state(agent).max_inventory
-  def max_items(agent), do: max(max_inventory(agent) - inventory_count(agent), 3)
-  def units_produced(agent), do: state(agent).units_produced
-  def units_produced_total(agent), do: state(agent).units_produced_total
-  def units_sold(agent), do: state(agent).units_sold
-  def units_sold_total(agent), do: state(agent).units_sold_total
-  def market(agent), do: state(agent).market
-  def initial_deposit(agent), do: state(agent).initial_deposit
-  def initiates_sale?(agent), do: state(agent).initiate_sale
-  def keep_inventory?(agent), do: state(agent.max_inventory) <= 0
-  def output_remaining(agent), do: state(agent).output - units_produced(agent)
-  def can_output?(agent), do: output_remaining(agent) > 0
-  def unit_cost(agent), do: state(agent).unit_cost
+  defp open_deposit_account(agent) do
+    cond do
+      bank(agent) != nil ->
+        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
+          {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
+          {:error, _} = err -> err
+        end
 
-  def set_market(agent, market), do: Agent.update(agent, fn x -> %{x | market: market} end)
+      true ->
+        {:error, :no_bank_assigned}
+    end
+  end
+
+  defp create_time_series_entry(label, value, cycle, simulation_id) do
+    %Repo.TimeSeries{label: label, value: value, cycle: cycle, simulation_id: simulation_id}
+  end
+
+  #############################################################################
+  # Production
+  #############################################################################
+
+  defp can_output?(agent), do: output_remaining(agent) > 0
+  defp recipe(agent), do: state(agent).recipe
+  defp units_produced(agent), do: state(agent).units_produced
+  defp units_produced_total(agent), do: state(agent).units_produced_total
+  defp output_remaining(agent), do: state(agent).output - units_produced(agent)
+  defp unit_cost(agent), do: state(agent).unit_cost
 
   def production_capacity(agent) do
     # things to consider
@@ -97,6 +139,34 @@ defmodule FactoryAgent do
         :ok
     end
   end
+
+  #############################################################################
+  # Inventory
+  #############################################################################
+
+  defp keep_inventory?(agent), do: state(agent).max_inventory <= 0
+  defp inventory(agent), do: state(agent).inventory
+  defp inventory_count(agent), do: length(state(agent).inventory)
+  defp max_inventory(agent), do: state(agent).max_inventory
+  defp max_items(agent), do: max(max_inventory(agent) - inventory_count(agent), 3)
+
+  def discard_inventory(agent) do
+    case keep_inventory?(agent) do
+      false -> Agent.update(agent, fn x -> %{x | inventory: []} end)
+      true -> :ok
+    end
+  end
+
+  #############################################################################
+  # Sales
+  #############################################################################
+
+  defp initiates_sale?(agent), do: state(agent).initiate_sale
+  defp market(agent), do: state(agent).market
+  defp units_sold(agent), do: state(agent).units_sold
+  defp units_sold_total(agent), do: state(agent).units_sold_total
+
+  def set_market(agent, market), do: Agent.update(agent, fn x -> %{x | market: market} end)
 
   def sell_to_customer(agent, buyer, quantity \\ 1, price \\ 1)
       when is_pid(buyer) and price > 0 and quantity > 0 do
@@ -142,7 +212,7 @@ defmodule FactoryAgent do
     # price is decided by market through bid price
     capacity = min(MarketAgent.purchase_capacity(market(agent)), inventory_count(agent))
 
-    case capacity > 0 do
+    case initiates_sale?(agent) && capacity > 0 do
       true ->
         sell_to_customer(
           agent,
@@ -156,20 +226,24 @@ defmodule FactoryAgent do
     end
   end
 
-  def evaluate(agent, cycle, simulation_id \\ "") do
-    # record the state of production
-    # reset cycle data
-    with :ok <- produce(agent),
-         :ok <- sell_to_market(agent),
-         :ok <- flush_statistics(agent, cycle, simulation_id),
-         :ok <- reset_cycle(agent, cycle) do
-      :ok
-    else
-      err ->
-        Logger.error("Factory is having problems: #{inspect(err)}")
-        err
+  #############################################################################
+  # Delivery
+  #############################################################################
+
+  defp remove_from_inventory(agent, quantity) do
+    case length(inventory(agent)) >= quantity do
+      true ->
+        {outgoing, remaining} = Enum.split(inventory(agent), quantity)
+        {Agent.update(agent, fn x -> %{x | inventory: remaining} end), outgoing}
+
+      false ->
+        {:error, :out_of_stock}
     end
   end
+
+  #############################################################################
+  # Statistics
+  #############################################################################
 
   def flush_statistics(agent, cycle, simulation_id) do
     with :ok <- flush_production_statistics(agent, cycle, simulation_id),
@@ -261,37 +335,5 @@ defmodule FactoryAgent do
     else
       err -> err
     end
-  end
-
-  def reset_cycle(agent, cycle) do
-    Agent.update(agent, fn x -> %{x | units_produced: 0, units_sold: 0, current_cycle: cycle} end)
-  end
-
-  defp remove_from_inventory(agent, quantity) do
-    case length(inventory(agent)) >= quantity do
-      true ->
-        {outgoing, remaining} = Enum.split(inventory(agent), quantity)
-        {Agent.update(agent, fn x -> %{x | inventory: remaining} end), outgoing}
-
-      false ->
-        {:error, :out_of_stock}
-    end
-  end
-
-  defp open_deposit_account(agent) do
-    cond do
-      bank(agent) != nil ->
-        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
-          {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
-          {:error, _} = err -> err
-        end
-
-      true ->
-        {:error, :no_bank_assigned}
-    end
-  end
-
-  defp create_time_series_entry(label, value, cycle, simulation_id) do
-    %Repo.TimeSeries{label: label, value: value, cycle: cycle, simulation_id: simulation_id}
   end
 end

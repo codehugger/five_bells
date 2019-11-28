@@ -14,6 +14,13 @@ defmodule BankAgent do
     ]
   end
 
+  def state(agent), do: Agent.get(agent, & &1)
+  def bank(agent), do: state(agent).bank
+
+  #############################################################################
+  # Simulation
+  #############################################################################
+
   def start_link(args \\ []) do
     case Bank.init_customer_bank_ledgers(struct(Bank, args)) do
       {:ok, bank} -> Agent.start_link(fn -> struct(State, [bank: bank] ++ args) end)
@@ -23,20 +30,49 @@ defmodule BankAgent do
 
   def stop(agent), do: Agent.stop(agent)
 
-  def state(agent), do: Agent.get(agent, & &1)
-  def bank(agent), do: state(agent).bank
+  def evaluate(agent, cycle, simulation_id \\ "") do
+    # fire borrowers who have paid their debts
+    fire_borrowers(agent)
+
+    # pay borrowers salaries so they can afford their next payments
+    Enum.each(borrowers(agent), fn b ->
+      # get total of next payment
+      {:ok, loan} = get_loan(agent, b)
+      {:ok, payment} = Loan.next_payment(loan)
+      {:ok, deposit} = get_account_deposit(agent, "interest_income")
+
+      case deposit > 0 do
+        true ->
+          # transfer amount from interest_income to borrower as salary
+          transfer(
+            agent,
+            "interest_income",
+            b,
+            min(LoanPayment.total(payment), deposit),
+            "Borrower salary payment"
+          )
+
+        false ->
+          nil
+      end
+    end)
+
+    # flush cycle statistics like transactions
+    flush_statistics(agent, cycle, simulation_id)
+
+    # flush transactions to db
+    flush_transactions(agent, cycle, simulation_id)
+
+    # reset all cycle data
+    reset_cycle(agent, cycle, simulation_id)
+  end
+
+  #############################################################################
+  # Accounts
+  #############################################################################
+
   def account_registry(agent), do: state(agent).account_registry
   def owner_registry(agent), do: state(agent).owner_registry
-  def loan_registry(agent), do: state(agent).loan_registry
-  def borrowers(agent), do: state(agent).borrowers
-  def simulation(agent), do: state(agent).simulation
-
-  def has_debt?(agent, customer) do
-    case get_loan(agent, customer) do
-      {:ok, _} -> true
-      {:error, _} -> false
-    end
-  end
 
   def get_account_no(agent, owner) when is_pid(owner) do
     case account_registry(agent)[owner] do
@@ -54,17 +90,6 @@ defmodule BankAgent do
       {:ok, account_no} -> Bank.get_account(bank(agent), account_no)
       err -> err
     end
-  end
-
-  def get_loan(agent, owner) when is_pid(owner) do
-    case get_account_no(agent, owner) do
-      {:ok, account_no} -> get_loan(agent, account_no)
-      err -> err
-    end
-  end
-
-  def get_loan(agent, account_no) when is_binary(account_no) do
-    Bank.get_loan(bank(agent), account_no)
   end
 
   def get_account_deposit(agent, owner) when is_pid(owner) do
@@ -120,17 +145,48 @@ defmodule BankAgent do
     end
   end
 
-  def deposit_cash(agent, owner, amount) when is_pid(owner) and amount > 0 do
+  defp register_account_ownership(agent, owner, account_no)
+       when is_pid(owner) and is_binary(account_no) do
+    Agent.update(agent, fn x ->
+      %{
+        x
+        | account_registry: Map.put(x.account_registry, owner, account_no),
+          owner_registry: Map.put(x.owner_registry, account_no, owner)
+      }
+    end)
+  end
+
+  #############################################################################
+  # Loans
+  #############################################################################
+
+  def loan_registry(agent), do: state(agent).loan_registry
+
+  def has_debt?(agent, customer) do
+    case get_loan(agent, customer) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
+  end
+
+  def get_loan(agent, owner) when is_pid(owner) do
     case get_account_no(agent, owner) do
-      {:ok, account_no} -> deposit_cash(agent, account_no, amount)
+      {:ok, account_no} -> get_loan(agent, account_no)
       err -> err
     end
   end
 
-  def deposit_cash(agent, account_no, amount) when is_binary(account_no) and amount > 0 do
-    case Bank.deposit_cash(bank(agent), account_no, amount) do
-      {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
-      err -> err
+  def get_loan(agent, account_no) when is_binary(account_no) do
+    Bank.get_loan(bank(agent), account_no)
+  end
+
+  def pay_loan(agent, borrower) do
+    with {:ok, account_no} <- get_account_no(agent, borrower),
+         {:ok, bank} <- Bank.pay_loan(bank(agent), account_no) do
+      Agent.update(agent, fn x -> %{x | bank: bank} end)
+    else
+      err ->
+        err
     end
   end
 
@@ -144,13 +200,21 @@ defmodule BankAgent do
     end
   end
 
-  def pay_loan(agent, borrower) do
-    with {:ok, account_no} <- get_account_no(agent, borrower),
-         {:ok, bank} <- Bank.pay_loan(bank(agent), account_no) do
-      Agent.update(agent, fn x -> %{x | bank: bank} end)
-    else
-      err ->
-        err
+  #############################################################################
+  # Transfers
+  #############################################################################
+
+  def deposit_cash(agent, owner, amount) when is_pid(owner) and amount > 0 do
+    case get_account_no(agent, owner) do
+      {:ok, account_no} -> deposit_cash(agent, account_no, amount)
+      err -> err
+    end
+  end
+
+  def deposit_cash(agent, account_no, amount) when is_binary(account_no) and amount > 0 do
+    case Bank.deposit_cash(bank(agent), account_no, amount) do
+      {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
+      err -> err
     end
   end
 
@@ -190,6 +254,12 @@ defmodule BankAgent do
     end
   end
 
+  #############################################################################
+  # Borrowers
+  #############################################################################
+
+  def borrowers(agent), do: state(agent).borrowers
+
   def hire_borrower(agent, borrower) do
     Agent.update(agent, fn x -> Map.update(x, :borrowers, [borrower], &[borrower | &1]) end)
   end
@@ -199,46 +269,39 @@ defmodule BankAgent do
     Agent.update(agent, fn x -> %{x | borrowers: borrowers} end)
   end
 
-  def evaluate(agent, cycle, simulation_id \\ "") do
-    # fire borrowers who have paid their debts
-    fire_borrowers(agent)
+  #############################################################################
+  # Cleanup
+  #############################################################################
 
-    # pay borrowers salaries so they can afford their next payments
-    Enum.each(borrowers(agent), fn b ->
-      # get total of next payment
-      {:ok, loan} = get_loan(agent, b)
-      {:ok, payment} = Loan.next_payment(loan)
-      {:ok, deposit} = get_account_deposit(agent, "interest_income")
+  defp flush_transactions(agent, cycle, simulation_id) do
+    # transform the transaction structs into maps that can be bulk inserted
+    transactions =
+      Enum.map(bank(agent).transactions, fn t ->
+        Map.from_struct(t)
+        |> Map.merge(%{cycle: cycle, bank: bank(agent).name, simulation_id: simulation_id})
+      end)
 
-      case deposit > 0 do
-        true ->
-          # transfer amount from interest_income to borrower as salary
-          transfer(
-            agent,
-            "interest_income",
-            b,
-            min(LoanPayment.total(payment), deposit),
-            "Borrower salary payment"
-          )
+    FiveBells.Repo.insert_all(Repo.Transaction, transactions)
 
-        false ->
-          nil
-      end
-    end)
-
-    # flush cycle statistics like transactions
-    flush_statistics(agent, cycle, simulation_id)
-
-    # flush transactions to db
-    flush_transactions(agent, cycle, simulation_id)
-
-    # reset all cycle data
-    reset_cycle(agent, cycle, simulation_id)
+    # clear the flushed transactions from the underlying bank module
+    clear_transactions(agent)
   end
 
   defp reset_cycle(agent, _cycle, _simulation_id) do
     reset_deltas(agent)
   end
+
+  defp clear_transactions(agent) do
+    Agent.update(agent, fn x -> %{x | bank: Bank.clear_transactions(x.bank)} end)
+  end
+
+  defp reset_deltas(agent) do
+    Agent.update(agent, fn x -> %{x | bank: Bank.reset_deltas(x.bank)} end)
+  end
+
+  #############################################################################
+  # Statistics
+  #############################################################################
 
   defp flush_statistics(agent, cycle, simulation_id) do
     # banks (deposits, loans)
@@ -331,39 +394,6 @@ defmodule BankAgent do
     Enum.each(bank(agent).unpaid_loans, fn {_account_no, loan} ->
       nil
       # IO.inspect(loan)
-    end)
-  end
-
-  defp flush_transactions(agent, cycle, simulation_id) do
-    # transform the transaction structs into maps that can be bulk inserted
-    transactions =
-      Enum.map(bank(agent).transactions, fn t ->
-        Map.from_struct(t)
-        |> Map.merge(%{cycle: cycle, bank: bank(agent).name, simulation_id: simulation_id})
-      end)
-
-    FiveBells.Repo.insert_all(Repo.Transaction, transactions)
-
-    # clear the flushed transactions from the underlying bank module
-    clear_transactions(agent)
-  end
-
-  defp clear_transactions(agent) do
-    Agent.update(agent, fn x -> %{x | bank: Bank.clear_transactions(x.bank)} end)
-  end
-
-  defp reset_deltas(agent) do
-    Agent.update(agent, fn x -> %{x | bank: Bank.reset_deltas(x.bank)} end)
-  end
-
-  defp register_account_ownership(agent, owner, account_no)
-       when is_pid(owner) and is_binary(account_no) do
-    Agent.update(agent, fn x ->
-      %{
-        x
-        | account_registry: Map.put(x.account_registry, owner, account_no),
-          owner_registry: Map.put(x.owner_registry, account_no, owner)
-      }
     end)
   end
 end

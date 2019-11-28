@@ -12,6 +12,12 @@ defmodule BorrowerAgent do
     ]
   end
 
+  def state(agent), do: Agent.get(agent, & &1)
+
+  #############################################################################
+  # Simulation
+  #############################################################################
+
   def start_link(args) do
     case Agent.start_link(fn -> struct(State, args) end) do
       {:ok, agent} = resp ->
@@ -24,14 +30,6 @@ defmodule BorrowerAgent do
         err
     end
   end
-
-  def state(agent), do: Agent.get(agent, & &1)
-  def bank(agent), do: state(agent).bank
-  def initial_deposit(agent), do: state(agent).initial_deposit
-  def loan_amount(agent), do: state(agent).loan_amount
-  def loan_duration(agent), do: state(agent).loan_duration
-  def interest_rate(agent), do: state(agent).interest_rate
-  def borrower_window(agent), do: state(agent).borrower_window
 
   def evaluate(agent, _cycle \\ nil, _simulation_id \\ nil) do
     case BankAgent.get_loan(bank(agent), agent) do
@@ -55,6 +53,21 @@ defmodule BorrowerAgent do
         )
     end
   end
+
+  #############################################################################
+  # Loan details
+  #############################################################################
+
+  defp loan_amount(agent), do: state(agent).loan_amount
+  defp loan_duration(agent), do: state(agent).loan_duration
+  defp interest_rate(agent), do: state(agent).interest_rate
+
+  #############################################################################
+  # Funds
+  #############################################################################
+
+  def bank(agent), do: state(agent).bank
+  def initial_deposit(agent), do: state(agent).initial_deposit
 
   defp open_deposit_account(agent) do
     cond do

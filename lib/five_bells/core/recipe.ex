@@ -8,5 +8,5 @@ defmodule Recipe do
   end
 
   def requires_components?(%Recipe{} = recipe), do: length(recipe.components) > 0
-  def ininite_ttl?(%Recipe{} = recipe), do: recipe.ttl <= 0
+  def infinite_ttl?(%Recipe{} = recipe), do: recipe.ttl <= 0
 end

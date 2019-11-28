@@ -6,21 +6,16 @@ defmodule SimulationAgent do
               simulation_id: nil
   end
 
-  def state(agent), do: Agent.get(agent, & &1)
-  def current_cycle(agent), do: state(agent).current_cycle
-  def simulation_id(agent), do: state(agent).simulation_id
+  defp state(agent), do: Agent.get(agent, & &1)
 
   def start_link(args \\ []) do
     Agent.start_link(fn -> struct(State, args) end)
   end
 
-  def repo(_agent) do
-    {:ok, FiveBells.Repo}
-  end
-
+  # TODO: make the simulation stop on error
   def evaluate(agent, fun \\ fn _cycle, _id -> :ok end) do
     # todo: how to do this?
-    case fun.(current_cycle(agent), simulation_id(agent)) do
+    case fun.(state(agent).current_cycle, state(agent).simulation_id) do
       :ok ->
         {:ok, Agent.update(agent, fn x -> %{x | current_cycle: x.current_cycle + 1} end)}
 

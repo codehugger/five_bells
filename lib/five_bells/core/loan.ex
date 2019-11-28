@@ -3,13 +3,20 @@ defmodule Loan do
             interest_rate: 0.0,
             duration: 12,
             period: 1,
-            scheduled_payments: [],
             payments_made: [],
             payments_remaining: []
 
   def paid_off?(%Loan{} = loan), do: length(loan.payments_remaining) == 0
   def monthly_rate(%Loan{} = loan), do: loan.interest_rate * 0.01 / 12.0
   def no_payments(%Loan{} = loan), do: round(loan.duration / loan.period)
+
+  def outstanding_capital(%Loan{} = loan) do
+    Enum.reduce(loan.payments_remaining, 0, fn p, sum -> sum + p.capital end)
+  end
+
+  def outstanding_interest(%Loan{} = loan) do
+    Enum.reduce(loan.payments_remaining, 0, fn p, sum -> sum + p.interest end)
+  end
 
   def monthly_payment(%Loan{} = loan) do
     monthly_rate = Loan.monthly_rate(loan)
@@ -65,10 +72,6 @@ defmodule Loan do
       err ->
         err
     end
-  end
-
-  def outstanding_capital(%Loan{} = loan) do
-    Enum.reduce(loan.payments_remaining, 0, fn p, sum -> sum + p.capital end)
   end
 
   defp add_baloon_payment(%Loan{} = loan) do

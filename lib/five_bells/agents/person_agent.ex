@@ -5,6 +5,12 @@ defmodule PersonAgent do
     defstruct [:name, :bank, :market, :account_no, initial_deposit: 0, consumed: []]
   end
 
+  def state(agent), do: Agent.get(agent, & &1)
+
+  #############################################################################
+  # Simulation
+  #############################################################################
+
   def start_link(args) do
     case Agent.start_link(fn -> struct(State, args) end) do
       {:ok, agent} = resp ->
@@ -18,20 +24,53 @@ defmodule PersonAgent do
     end
   end
 
-  def state(agent), do: Agent.get(agent, & &1)
-  def name(agent), do: Agent.get(agent, & &1.name)
-  def bank(agent), do: Agent.get(agent, & &1.bank)
-  def market(agent), do: Agent.get(agent, & &1.market)
-  def initial_deposit(agent), do: Agent.get(agent, & &1.initial_deposit)
+  def evaluate(agent, _cycle, _simulation_id) do
+    case purchase(agent) do
+      {:ok, product} ->
+        consume(agent, product)
 
+      {:error, _} = err ->
+        err
+    end
+  end
+
+  #############################################################################
+  # Funds
+  #############################################################################
+
+  def bank(agent), do: Agent.get(agent, & &1.bank)
+  def initial_deposit(agent), do: Agent.get(agent, & &1.initial_deposit)
   def account(agent), do: BankAgent.get_account(bank(agent), agent)
   def account_deposit(agent), do: BankAgent.get_account_deposit(bank(agent), agent)
   def account_no(agent), do: BankAgent.get_account_no(bank(agent), agent)
+
+  defp open_deposit_account(agent) do
+    cond do
+      bank(agent) != nil ->
+        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
+          {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
+          {:error, _} = err -> err
+        end
+
+      true ->
+        {:error, :no_bank_assigned}
+    end
+  end
+
+  #############################################################################
+  # Consumption
+  #############################################################################
 
   def consume(agent, product) do
     # IO.puts("#{state(agent).name} consumed #{inspect(product)}")
     Agent.update(agent, fn x -> %{x | consumed: [product | x.consumed]} end)
   end
+
+  #############################################################################
+  # Purchase
+  #############################################################################
+
+  def market(agent), do: Agent.get(agent, & &1.market)
 
   def purchase(agent) do
     {:ok, deposit} = account_deposit(agent)
@@ -56,29 +95,6 @@ defmodule PersonAgent do
             # IO.puts("#{name(agent)} unable to acquired product from market #{inspect(reason)}")
             err
         end
-    end
-  end
-
-  def evaluate(agent, _cycle, _simulation_id) do
-    case purchase(agent) do
-      {:ok, product} ->
-        consume(agent, product)
-
-      {:error, _} = err ->
-        err
-    end
-  end
-
-  defp open_deposit_account(agent) do
-    cond do
-      bank(agent) != nil ->
-        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
-          {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
-          {:error, _} = err -> err
-        end
-
-      true ->
-        {:error, :no_bank_assigned}
     end
   end
 end

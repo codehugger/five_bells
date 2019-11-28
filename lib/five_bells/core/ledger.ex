@@ -9,6 +9,10 @@ defmodule Ledger do
     delta: 0
   ]
 
+  #############################################################################
+  # Accounts
+  #############################################################################
+
   def add_account(%Ledger{} = ledger), do: add_account(ledger, nil)
 
   def add_account(%Ledger{} = ledger, account_no) when account_no == nil do
@@ -30,6 +34,15 @@ defmodule Ledger do
     end
   end
 
+  defp generate_account_no(%Ledger{} = ledger) do
+    "#{length(Map.keys(ledger.accounts)) + 1}"
+    |> String.pad_leading(4, "0")
+  end
+
+  #############################################################################
+  # Double-Entry Bookkeeping
+  #############################################################################
+
   def debit(%Ledger{} = ledger, account_no, amount) do
     ledger |> post(account_no, amount * -1)
   end
@@ -37,25 +50,6 @@ defmodule Ledger do
   def credit(%Ledger{} = ledger, account_no, amount) do
     ledger |> post(account_no, amount)
   end
-
-  def reset_deltas(%Ledger{} = ledger) do
-    %{
-      ledger
-      | delta: 0,
-        accounts:
-          Map.new(ledger.accounts, fn {name, account} -> {name, %{account | delta: 0}} end)
-    }
-  end
-
-  def get_deposit_total(%Ledger{} = ledger) do
-    Enum.reduce(ledger.accounts, 0, fn {_acc_no, acc}, sum -> sum + acc.deposit end)
-  end
-
-  # TODO: loans need to be moved under accounts before attempting this!!!
-  # def total(%Ledger{} = ledger) do
-  #   case {ledger.ledger_type, ledger.account_type} do
-  #   end
-  # end
 
   defp polarity(%Ledger{} = ledger) do
     case @account_polarity[ledger.account_type] do
@@ -91,8 +85,30 @@ defmodule Ledger do
     end
   end
 
-  defp generate_account_no(%Ledger{} = ledger) do
-    "#{length(Map.keys(ledger.accounts)) + 1}"
-    |> String.pad_leading(4, "0")
+  #############################################################################
+  # Statistics
+  #############################################################################
+
+  def get_deposit_total(%Ledger{} = ledger) do
+    Enum.reduce(ledger.accounts, 0, fn {_acc_no, acc}, sum -> sum + acc.deposit end)
+  end
+
+  # TODO: loans need to be moved under accounts before attempting this!!!
+  # def total(%Ledger{} = ledger) do
+  #   case {ledger.ledger_type, ledger.account_type} do
+  #   end
+  # end
+
+  #############################################################################
+  # Cleanup
+  #############################################################################
+
+  def reset_deltas(%Ledger{} = ledger) do
+    %{
+      ledger
+      | delta: 0,
+        accounts:
+          Map.new(ledger.accounts, fn {name, account} -> {name, %{account | delta: 0}} end)
+    }
   end
 end

@@ -9,19 +9,9 @@ defmodule Bank do
     transactions: []
   ]
 
-  def open_deposit_account(%Bank{} = bank) do
-    case add_account(bank, "deposit") do
-      {:ok, _bank, _account_no} = resp -> resp
-      {:error, _} = error -> error
-    end
-  end
-
-  def deposit_cash(%Bank{} = bank, account_no, amount) do
-    case get_account(bank, account_no) do
-      {:ok, _} -> transfer(bank, "cash", account_no, amount)
-      {:error, _} = err -> err
-    end
-  end
+  #############################################################################
+  # Loans
+  #############################################################################
 
   def pay_loan(%Bank{} = bank, account_no) do
     with {:ok, loan} <- get_loan(bank, account_no),
@@ -107,41 +97,6 @@ defmodule Bank do
     end
   end
 
-  def transfer(bank, debit_no, credit_no, amount, text \\ "")
-
-  # it is sooooo much easier to write code that just ignores zero transactions :)
-  def transfer(%Bank{} = bank, _, _, amount, _) when amount == 0, do: {:ok, bank}
-
-  def transfer(%Bank{} = bank, debit_no, credit_no, amount, text) do
-    with {:ok, bank} <- credit(bank, credit_no, amount),
-         {:ok, bank} <- debit(bank, debit_no, amount),
-         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount, text) do
-      {:ok, bank}
-    else
-      {:error, _} = err -> err
-    end
-  end
-
-  def get_ledger(%Bank{} = bank, account_no) do
-    case bank.ledgers |> Enum.find(fn {_name, ledger} -> ledger.accounts[account_no] end) do
-      nil -> {:error, {:ledger_not_found, [account_no: account_no]}}
-      {_name, ledger} -> {:ok, ledger}
-    end
-  end
-
-  def get_account(%Bank{} = bank, account_no) do
-    case bank.ledgers
-         # collect all account registries from all ledgers
-         |> Enum.map(fn {_name, ledger} -> ledger.accounts end)
-         # merge the accounts into one registry
-         |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
-         # get the account from the map if it exists
-         |> Map.get(account_no) do
-      nil -> {:error, :account_not_found}
-      account -> {:ok, account}
-    end
-  end
-
   def get_loan(%Bank{} = bank, account_no, type \\ :unpaid) do
     loan =
       case type do
@@ -155,92 +110,30 @@ defmodule Bank do
     end
   end
 
-  def add_ledger(%Bank{} = bank, name, ledger_type, account_type) do
-    case Map.has_key?(bank.ledgers, name) do
-      true ->
-        {:error, {:ledger_already_exists, name}}
+  #############################################################################
+  # Transfers
+  #############################################################################
 
-      false ->
-        {:ok,
-         %{
-           bank
-           | ledgers:
-               Map.put(bank.ledgers, name, %Ledger{
-                 name: name,
-                 ledger_type: ledger_type,
-                 account_type: account_type
-               })
-         }}
+  def deposit_cash(%Bank{} = bank, account_no, amount) do
+    case get_account(bank, account_no) do
+      {:ok, _} -> transfer(bank, "cash", account_no, amount)
+      {:error, _} = err -> err
     end
   end
 
-  def add_account(
-        %Bank{} = bank,
-        ledger_name,
-        account_no \\ nil
-      )
-      when is_binary(ledger_name) do
-    case bank.ledgers[ledger_name] do
-      nil ->
-        {:error, {:ledger_not_found, ledger_name}}
+  def transfer(bank, debit_no, credit_no, amount, text \\ "")
 
-      ledger ->
-        case Ledger.add_account(ledger, account_no) do
-          {:ok, ledger, acc_no} ->
-            {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger_name, ledger)}, acc_no}
+  # it is sooooo much easier to write code that just ignores zero transactions :)
+  def transfer(%Bank{} = bank, _, _, amount, _) when amount == 0, do: {:ok, bank}
 
-          {:error, _} = error ->
-            error
-        end
-    end
-  end
-
-  def init_customer_bank_ledgers(%Bank{} = bank) do
-    with {:ok, bank} <- add_ledger(bank, "deposit", "deposit", "liability"),
-         # Cash
-         {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
-         {:ok, bank, _} <- add_account(bank, "cash", "cash"),
-         # Loans
-         {:ok, bank} <- add_ledger(bank, "loan", "loan", "asset"),
-         {:ok, bank, _} <- add_account(bank, "loan", "loan"),
-         {:ok, bank} <- add_ledger(bank, "interest_income", "interest_income", "liability"),
-         {:ok, bank, _} <- add_account(bank, "interest_income", "interest_income") do
+  def transfer(%Bank{} = bank, debit_no, credit_no, amount, text) do
+    with {:ok, bank} <- credit(bank, credit_no, amount),
+         {:ok, bank} <- debit(bank, debit_no, amount),
+         {:ok, bank} <- register_transaction(bank, debit_no, credit_no, amount, text) do
       {:ok, bank}
     else
-      {:error, _} = error -> error
+      {:error, _} = err -> err
     end
-  end
-
-  def init_central_bank_ledgers(%Bank{} = bank) do
-    {:ok, bank}
-  end
-
-  def clear_transactions(%Bank{} = bank) do
-    %{bank | transactions: []}
-  end
-
-  def reset_deltas(%Bank{} = bank) do
-    %{
-      bank
-      | ledgers:
-          Map.new(bank.ledgers, fn {name, ledger} -> {name, Ledger.reset_deltas(ledger)} end)
-    }
-  end
-
-  def total_deposits(%Bank{} = bank) do
-    case bank.ledgers["deposit"] do
-      nil ->
-        {:error, :no_deposit_ledger}
-
-      ledger ->
-        Ledger.get_deposit_total(ledger)
-    end
-  end
-
-  def total_outstanding_capital(%Bank{} = bank) do
-    Enum.reduce(bank.unpaid_loans, 0, fn {_acc_no, loan}, sum ->
-      sum + Loan.outstanding_capital(loan)
-    end)
   end
 
   defp credit(%Bank{} = bank, account_no, amount) do
@@ -275,5 +168,140 @@ defmodule Bank do
            | bank.transactions
          ]
      }}
+  end
+
+  #############################################################################
+  # Ledgers
+  #############################################################################
+
+  def add_ledger(%Bank{} = bank, name, ledger_type, account_type) do
+    case Map.has_key?(bank.ledgers, name) do
+      true ->
+        {:error, {:ledger_already_exists, name}}
+
+      false ->
+        {:ok,
+         %{
+           bank
+           | ledgers:
+               Map.put(bank.ledgers, name, %Ledger{
+                 name: name,
+                 ledger_type: ledger_type,
+                 account_type: account_type
+               })
+         }}
+    end
+  end
+
+  def get_ledger(%Bank{} = bank, account_no) do
+    case bank.ledgers |> Enum.find(fn {_name, ledger} -> ledger.accounts[account_no] end) do
+      nil -> {:error, {:ledger_not_found, [account_no: account_no]}}
+      {_name, ledger} -> {:ok, ledger}
+    end
+  end
+
+  #############################################################################
+  # Accounts
+  #############################################################################
+
+  def add_account(
+        %Bank{} = bank,
+        ledger_name,
+        account_no \\ nil
+      )
+      when is_binary(ledger_name) do
+    case bank.ledgers[ledger_name] do
+      nil ->
+        {:error, {:ledger_not_found, ledger_name}}
+
+      ledger ->
+        case Ledger.add_account(ledger, account_no) do
+          {:ok, ledger, acc_no} ->
+            {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger_name, ledger)}, acc_no}
+
+          {:error, _} = error ->
+            error
+        end
+    end
+  end
+
+  def get_account(%Bank{} = bank, account_no) do
+    case bank.ledgers
+         # collect all account registries from all ledgers
+         |> Enum.map(fn {_name, ledger} -> ledger.accounts end)
+         # merge the accounts into one registry
+         |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
+         # get the account from the map if it exists
+         |> Map.get(account_no) do
+      nil -> {:error, :account_not_found}
+      account -> {:ok, account}
+    end
+  end
+
+  def open_deposit_account(%Bank{} = bank) do
+    case add_account(bank, "deposit") do
+      {:ok, _bank, _account_no} = resp -> resp
+      {:error, _} = error -> error
+    end
+  end
+
+  #############################################################################
+  # Init
+  #############################################################################
+
+  def init_customer_bank_ledgers(%Bank{} = bank) do
+    with {:ok, bank} <- add_ledger(bank, "deposit", "deposit", "liability"),
+         # Cash
+         {:ok, bank} <- add_ledger(bank, "cash", "cash", "asset"),
+         {:ok, bank, _} <- add_account(bank, "cash", "cash"),
+         # Loans
+         {:ok, bank} <- add_ledger(bank, "loan", "loan", "asset"),
+         {:ok, bank, _} <- add_account(bank, "loan", "loan"),
+         {:ok, bank} <- add_ledger(bank, "interest_income", "interest_income", "liability"),
+         {:ok, bank, _} <- add_account(bank, "interest_income", "interest_income") do
+      {:ok, bank}
+    else
+      {:error, _} = error -> error
+    end
+  end
+
+  def init_central_bank_ledgers(%Bank{} = bank) do
+    {:ok, bank}
+  end
+
+  #############################################################################
+  # Cleanup
+  #############################################################################
+
+  def clear_transactions(%Bank{} = bank) do
+    %{bank | transactions: []}
+  end
+
+  def reset_deltas(%Bank{} = bank) do
+    %{
+      bank
+      | ledgers:
+          Map.new(bank.ledgers, fn {name, ledger} -> {name, Ledger.reset_deltas(ledger)} end)
+    }
+  end
+
+  #############################################################################
+  # Statistics
+  #############################################################################
+
+  def total_deposits(%Bank{} = bank) do
+    case bank.ledgers["deposit"] do
+      nil ->
+        {:error, :no_deposit_ledger}
+
+      ledger ->
+        Ledger.get_deposit_total(ledger)
+    end
+  end
+
+  def total_outstanding_capital(%Bank{} = bank) do
+    Enum.reduce(bank.unpaid_loans, 0, fn {_acc_no, loan}, sum ->
+      sum + Loan.outstanding_capital(loan)
+    end)
   end
 end
