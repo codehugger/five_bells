@@ -13,6 +13,7 @@ defmodule FactoryAgent do
       units_produced_total: 0,
       current_cycle: 0,
       name: "Factory",
+      factory_no: "F-0001",
       recipe: %Recipe{},
       initial_deposit: 0,
       max_inventory: -1,
@@ -93,16 +94,13 @@ defmodule FactoryAgent do
     end
   end
 
-  defp create_time_series_entry(label, value, cycle, simulation_id) do
-    %Repo.TimeSeries{label: label, value: value, cycle: cycle, simulation_id: simulation_id}
-  end
-
   #############################################################################
   # Production
   #############################################################################
 
-  defp can_output?(agent), do: output_remaining(agent) > 0
+  def product_name(agent), do: recipe(agent).product_name
   defp recipe(agent), do: state(agent).recipe
+  defp can_output?(agent), do: output_remaining(agent) > 0
   defp units_produced(agent), do: state(agent).units_produced
   defp units_produced_total(agent), do: state(agent).units_produced_total
   defp output_remaining(agent), do: state(agent).output - units_produced(agent)
@@ -245,7 +243,7 @@ defmodule FactoryAgent do
   # Statistics
   #############################################################################
 
-  def flush_statistics(agent, cycle, simulation_id) do
+  defp flush_statistics(agent, cycle, simulation_id) do
     with :ok <- flush_production_statistics(agent, cycle, simulation_id),
          :ok <- flush_sales_statistics(agent, cycle, simulation_id),
          :ok <- flush_inventory_statistics(agent, cycle, simulation_id) do
@@ -255,13 +253,13 @@ defmodule FactoryAgent do
     end
   end
 
-  def flush_production_statistics(agent, cycle, simulation_id) do
-    factory = state(agent)
-
+  defp flush_production_statistics(agent, cycle, simulation_id) do
     with {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.units_produced.#{factory.name}",
+               agent,
+               "factory.units_produced",
+               product_name(agent),
                units_produced(agent),
                cycle,
                simulation_id
@@ -270,7 +268,9 @@ defmodule FactoryAgent do
          {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.units_produced_total.#{factory.name}",
+               agent,
+               "factory.units_produced_total",
+               product_name(agent),
                units_produced_total(agent),
                cycle,
                simulation_id
@@ -279,7 +279,9 @@ defmodule FactoryAgent do
          {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.output_remaining.#{factory.name}",
+               agent,
+               "factory.output_remaining",
+               product_name(agent),
                # correct for this being recorded after the inventory might have been sold
                output_remaining(agent) + units_produced(agent),
                cycle,
@@ -292,13 +294,13 @@ defmodule FactoryAgent do
     end
   end
 
-  def flush_sales_statistics(agent, cycle, simulation_id) do
-    factory = state(agent)
-
+  defp flush_sales_statistics(agent, cycle, simulation_id) do
     with {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.units_sold.#{factory.name}",
+               agent,
+               "factory.units_sold",
+               product_name(agent),
                units_sold(agent),
                cycle,
                simulation_id
@@ -307,7 +309,9 @@ defmodule FactoryAgent do
          {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.units_sold_total.#{factory.name}",
+               agent,
+               "factory.units_sold_total",
+               product_name(agent),
                units_sold_total(agent),
                cycle,
                simulation_id
@@ -319,13 +323,13 @@ defmodule FactoryAgent do
     end
   end
 
-  def flush_inventory_statistics(agent, cycle, simulation_id) do
-    factory = state(agent)
-
+  defp flush_inventory_statistics(agent, cycle, simulation_id) do
     with {:ok, _} <-
            FiveBells.Repo.insert(
              create_time_series_entry(
-               "factory.inventory_count.#{factory.name}",
+               agent,
+               "factory.inventory_count",
+               product_name(agent),
                inventory_count(agent),
                cycle,
                simulation_id
@@ -335,5 +339,17 @@ defmodule FactoryAgent do
     else
       err -> err
     end
+  end
+
+  defp create_time_series_entry(agent, label, key, value, cycle, simulation_id) do
+    %Repo.TimeSeries{
+      label: label,
+      key: key,
+      entity_type: "Factory",
+      entity_id: state(agent).factory_no,
+      value: value,
+      cycle: cycle,
+      simulation_id: simulation_id
+    }
   end
 end

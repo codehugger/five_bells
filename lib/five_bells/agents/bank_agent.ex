@@ -4,13 +4,14 @@ defmodule BankAgent do
   defmodule State do
     defstruct [
       :bank,
+      name: "Bank",
+      bank_no: "B-0001",
       # account_registry - owner => account_no
       account_registry: %{},
       # owner_registry - account_no => owner
       owner_registry: %{},
       # a special set of employees that get a salary based on outstanding debt
       borrowers: []
-      # a reference to the current simulation
     ]
   end
 
@@ -133,7 +134,7 @@ defmodule BankAgent do
         # Deposit cash if there is an initial deposit
         cond do
           initial_deposit > 0 ->
-            BankAgent.deposit_cash(agent, account_no, initial_deposit)
+            BankAgent.deposit_cash(agent, account_no, initial_deposit, "Initial deposit")
             {:ok, account_no}
 
           true ->
@@ -204,15 +205,17 @@ defmodule BankAgent do
   # Transfers
   #############################################################################
 
-  def deposit_cash(agent, owner, amount) when is_pid(owner) and amount > 0 do
+  def deposit_cash(_agent, _owner, _amount, _text \\ "")
+
+  def deposit_cash(agent, owner, amount, text) when is_pid(owner) and amount > 0 do
     case get_account_no(agent, owner) do
-      {:ok, account_no} -> deposit_cash(agent, account_no, amount)
+      {:ok, account_no} -> deposit_cash(agent, account_no, amount, text)
       err -> err
     end
   end
 
-  def deposit_cash(agent, account_no, amount) when is_binary(account_no) and amount > 0 do
-    case Bank.deposit_cash(bank(agent), account_no, amount) do
+  def deposit_cash(agent, account_no, amount, text) when is_binary(account_no) and amount > 0 do
+    case Bank.deposit_cash(bank(agent), account_no, amount, text) do
       {:ok, bank} -> Agent.update(agent, fn x -> %{x | bank: bank} end)
       err -> err
     end
@@ -278,7 +281,7 @@ defmodule BankAgent do
     transactions =
       Enum.map(bank(agent).transactions, fn t ->
         Map.from_struct(t)
-        |> Map.merge(%{cycle: cycle, bank: bank(agent).name, simulation_id: simulation_id})
+        |> Map.merge(%{cycle: cycle, bank: state(agent).name, simulation_id: simulation_id})
       end)
 
     FiveBells.Repo.insert_all(Repo.Transaction, transactions)
@@ -307,8 +310,8 @@ defmodule BankAgent do
     # banks (deposits, loans)
     flush_bank_statistics(agent, cycle, simulation_id)
 
-    # accounts (delta, total)
-    flush_account_statistics(agent, cycle, simulation_id)
+    # deposits (delta, total)
+    flush_deposit_statistics(agent, cycle, simulation_id)
 
     # ledgers (delta, total)
     flush_ledger_statistics(agent, cycle, simulation_id)
@@ -318,31 +321,36 @@ defmodule BankAgent do
   end
 
   defp flush_bank_statistics(agent, cycle, simulation_id) do
-    bank = bank(agent)
-
     # total deposits
     FiveBells.Repo.insert(%Repo.TimeSeries{
-      label: "bank.total_deposit.#{bank.bank_no}",
-      value: Bank.total_deposits(bank),
+      label: "bank.total.deposit",
+      key: "#{state(agent).bank_no}",
+      entity_type: "Bank",
+      entity_id: "#{state(agent).bank_no}",
+      value: Bank.total_deposits(bank(agent)),
       cycle: cycle,
       simulation_id: simulation_id
     })
 
     # total loan capital
     FiveBells.Repo.insert(%Repo.TimeSeries{
-      label: "bank.total_outstanding_capital.#{bank.bank_no}",
-      value: Bank.total_outstanding_capital(bank),
+      label: "bank.total.outstanding_capital",
+      key: "#{state(agent).bank_no}",
+      entity_type: "Bank",
+      entity_id: "#{state(agent).bank_no}",
+      value: Bank.total_outstanding_capital(bank(agent)),
       cycle: cycle,
       simulation_id: simulation_id
     })
   end
 
   defp flush_ledger_statistics(agent, cycle, simulation_id) do
-    bank = bank(agent)
-
-    Enum.each(bank.ledgers, fn {ledger_name, ledger} ->
+    Enum.each(bank(agent).ledgers, fn {ledger_name, ledger} ->
       FiveBells.Repo.insert(%Repo.TimeSeries{
-        label: "ledger.delta.#{bank.bank_no}-#{ledger_name}",
+        label: "bank.ledger.delta",
+        key: "#{ledger_name}",
+        entity_type: "Bank",
+        entity_id: "#{state(agent).bank_no}",
         value: ledger.delta,
         cycle: cycle,
         simulation_id: simulation_id
@@ -358,36 +366,43 @@ defmodule BankAgent do
     end)
   end
 
-  defp flush_account_statistics(agent, cycle, simulation_id) do
-    bank = bank(agent)
+  defp flush_deposit_statistics(agent, cycle, simulation_id) do
+    case bank(agent).ledgers["deposit"] do
+      ledger ->
+        # Bank account deltas (net inflow/outflow)
+        FiveBells.Repo.insert_all(
+          Repo.TimeSeries,
+          Enum.map(ledger.accounts, fn {account_no, account} ->
+            %{
+              label: "bank.account.delta",
+              key: "#{state(agent).bank_no}-deposit-#{account_no}",
+              entity_type: "Bank",
+              entity_id: "#{state(agent).bank_no}",
+              value: account.delta,
+              cycle: cycle,
+              simulation_id: simulation_id
+            }
+          end)
+        )
 
-    Enum.each(bank.ledgers, fn {ledger_name, ledger} ->
-      # Store account deltas
-      FiveBells.Repo.insert_all(
-        Repo.TimeSeries,
-        Enum.map(ledger.accounts, fn {account_no, account} ->
-          %{
-            label: "account.delta.#{bank.bank_no}-#{ledger_name}-#{account_no}",
-            value: account.delta,
-            cycle: cycle,
-            simulation_id: simulation_id
-          }
-        end)
-      )
+        # Bank account deposits
+        FiveBells.Repo.insert_all(
+          Repo.TimeSeries,
+          Enum.map(ledger.accounts, fn {account_no, account} ->
+            %{
+              label: "bank.account.deposit",
+              key: "#{state(agent).bank_no}-deposit-#{account_no}",
+              entity_type: "Bank",
+              entity_id: "#{state(agent).bank_no}",
+              value: account.deposit,
+              cycle: cycle,
+              simulation_id: simulation_id
+            }
+          end)
+        )
+    end
 
-      # Store account deposits
-      FiveBells.Repo.insert_all(
-        Repo.TimeSeries,
-        Enum.map(ledger.accounts, fn {account_no, account} ->
-          %{
-            label: "account.deposit.#{bank.bank_no}-#{ledger_name}-#{account_no}",
-            value: account.deposit,
-            cycle: cycle,
-            simulation_id: simulation_id
-          }
-        end)
-      )
-    end)
+    :ok
   end
 
   defp flush_loan_statistics(agent, _cycle, _simulation_id) do

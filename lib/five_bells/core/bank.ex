@@ -1,8 +1,6 @@
 defmodule Bank do
   defstruct [
     :central_bank,
-    bank_no: "0001",
-    name: "Bank",
     ledgers: %{},
     unpaid_loans: %{},
     paid_loans: %{},
@@ -114,9 +112,9 @@ defmodule Bank do
   # Transfers
   #############################################################################
 
-  def deposit_cash(%Bank{} = bank, account_no, amount) do
+  def deposit_cash(%Bank{} = bank, account_no, amount, text \\ "Cash deposit") do
     case get_account(bank, account_no) do
-      {:ok, _} -> transfer(bank, "cash", account_no, amount)
+      {:ok, _} -> transfer(bank, "cash", account_no, amount, text)
       {:error, _} = err -> err
     end
   end
