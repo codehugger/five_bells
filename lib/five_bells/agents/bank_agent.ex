@@ -314,7 +314,7 @@ defmodule BankAgent do
     flush_ledger_statistics(agent, cycle, simulation_id)
 
     # loans (capital/interest -> paid/unpaid)
-    # flush_loan_statistics(agent, cycle, simulation_id)
+    flush_loan_statistics(agent, cycle, simulation_id)
   end
 
   defp flush_bank_statistics(agent, cycle, simulation_id) do
@@ -390,8 +390,8 @@ defmodule BankAgent do
     end)
   end
 
-  defp flush_loan_statistics(agent, cycle, simulation_id) do
-    Enum.each(bank(agent).unpaid_loans, fn {_account_no, loan} ->
+  defp flush_loan_statistics(agent, _cycle, _simulation_id) do
+    Enum.each(bank(agent).unpaid_loans, fn {_account_no, _loan} ->
       nil
       # IO.inspect(loan)
     end)
