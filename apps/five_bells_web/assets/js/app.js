@@ -10,6 +10,10 @@ import css from "../css/app.css"
 // Import dependencies
 //
 import "phoenix_html"
+import Chartkick from "chartkick"
+import Chart from "chart.js"
+
+Chartkick.use(Chart)
 
 // Import local files
 //
