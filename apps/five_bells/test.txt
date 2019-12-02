@@ -1,0 +1,1668 @@
+Compiling 1 file (.ex)
+Person11 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person34 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person29 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person23 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person5 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person35 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person32 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person15 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person16 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person28 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person27 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person31 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person8 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person21 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person6 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person30 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person37 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person12 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person36 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person18 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person7 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person40 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person38 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person17 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person25 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person3 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person13 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person10 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person26 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person4 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person20 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person9 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person24 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person14 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person19 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person39 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person1 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person22 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person33 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person2 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 0,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 20,
+  products_sold: 0,
+  products_sold_total: 0,
+  sell_price: 2,
+  spread: 4,
+  supplier: #PID<0.243.0>
+}
+Market lowering prices
+Market adjusting spread
+Person30 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person39 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person27 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person5 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person33 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person14 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person22 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person23 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person15 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person26 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person28 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person21 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person25 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person29 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person40 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 5
+Person8 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person16 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person4 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person9 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person36 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person35 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person31 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person37 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person38 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person10 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person32 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person7 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person20 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person6 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person13 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person17 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person12 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person24 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person11 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person34 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 1,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 40,
+  products_sold: 20,
+  products_sold_total: 20,
+  sell_price: 5,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+Person31 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person25 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person33 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person9 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person17 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person26 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person34 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person40 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person20 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person12 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person15 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person8 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person16 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person14 bought %Product{name: "Recipe Product", ttl: -1} at 10
+Person24 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person4 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person13 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person27 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person28 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person7 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person39 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person10 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person5 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person32 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person29 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person11 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person37 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person6 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person22 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person21 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person38 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person35 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person23 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person30 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 2,
+  cash_buffer: 4,
+  current_cycle: 2,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 60,
+  products_sold: 20,
+  products_sold_total: 40,
+  sell_price: 10,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+Person22 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person21 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person10 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person28 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person32 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person24 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person4 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person29 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person27 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person30 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person35 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person11 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person6 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person39 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person7 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person37 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person13 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person23 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person5 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Person38 bought %Product{name: "Recipe Product", ttl: -1} at 15
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 3,
+  cash_buffer: 4,
+  current_cycle: 3,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 80,
+  products_sold: 20,
+  products_sold_total: 60,
+  sell_price: 15,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 4,
+  cash_buffer: 4,
+  current_cycle: 4,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 80,
+  products_sold: 0,
+  products_sold_total: 60,
+  sell_price: 20,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+Person13 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person33 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person9 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person40 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person35 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person25 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person38 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person10 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person34 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person11 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person24 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person16 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person14 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person12 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person8 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person4 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person17 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person32 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person15 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person26 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person20 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person6 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person37 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person31 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person7 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 5,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 100,
+  products_sold: 20,
+  products_sold_total: 80,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+Person25 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person10 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person9 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person7 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person34 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person16 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person12 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person13 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person14 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person35 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person15 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person8 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person38 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person40 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person24 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person33 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person11 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person20 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person36 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person17 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person37 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person32 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person26 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person6 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person31 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person4 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 2,
+  cash_buffer: 4,
+  current_cycle: 6,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 120,
+  products_sold: 20,
+  products_sold_total: 100,
+  sell_price: 2,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+Person4 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person37 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person9 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person15 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person11 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person32 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person31 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person6 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person34 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person16 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person7 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person8 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person33 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person12 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person17 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person26 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Person20 bought %Product{name: "Recipe Product", ttl: -1} at 3
+Market receiving inventory of size 18
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 3,
+  cash_buffer: 4,
+  current_cycle: 7,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 18,
+  products_bought_total: 138,
+  products_sold: 18,
+  products_sold_total: 118,
+  sell_price: 3,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 18/18
+Market raising prices
+Market adjusting spread
+Person17 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person16 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person31 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person34 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person8 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person12 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person20 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Person9 bought %Product{name: "Recipe Product", ttl: -1} at 4
+Market receiving inventory of size 9
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 4,
+  cash_buffer: 4,
+  current_cycle: 8,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 9,
+  products_bought_total: 147,
+  products_sold: 9,
+  products_sold_total: 127,
+  sell_price: 4,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 9/9
+Market raising prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 5,
+  cash_buffer: 4,
+  current_cycle: 9,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 147,
+  products_sold: 0,
+  products_sold_total: 127,
+  sell_price: 5,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person35 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person24 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person32 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person6 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person37 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person38 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person26 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person33 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person31 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person20 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person13 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person4 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person11 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person8 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person40 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person10 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person17 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person14 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Person25 unable to acquired product from market {:not_enough_stock, [available: 0, requested: 1]}
+Market receiving inventory of size 20
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 10,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 20,
+  products_bought_total: 167,
+  products_sold: 20,
+  products_sold_total: 147,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 20/20
+Market raising prices
+Market adjusting spread
+Person20 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person25 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person40 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person31 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person14 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person17 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Person10 bought %Product{name: "Recipe Product", ttl: -1} at 2
+Market receiving inventory of size 7
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 2,
+  cash_buffer: 4,
+  current_cycle: 11,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 7,
+  products_bought_total: 174,
+  products_sold: 7,
+  products_sold_total: 154,
+  sell_price: 2,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 7/7
+Market raising prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 3,
+  cash_buffer: 4,
+  current_cycle: 12,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 174,
+  products_sold: 0,
+  products_sold_total: 154,
+  sell_price: 3,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+Person38 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person1 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person18 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person37 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person32 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person17 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person13 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person36 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person2 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person24 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person19 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person6 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person35 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person4 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person3 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Person26 bought %Product{name: "Recipe Product", ttl: -1} at 1
+Market receiving inventory of size 16
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 13,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 16,
+  products_bought_total: 190,
+  products_sold: 16,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 16/16
+Market raising prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 2,
+  cash_buffer: 4,
+  current_cycle: 14,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 2,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 15,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 16,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 17,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 18,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 19,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 20,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 21,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 22,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 23,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 24,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 25,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 26,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 27,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 28,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread
+%FiveBells.Agents.MarketAgent.State{
+  account_no: "0002",
+  bank: #PID<0.242.0>,
+  bid_price: 1,
+  cash_buffer: 4,
+  current_cycle: 29,
+  initial_deposit: 100,
+  initiates_purchase: false,
+  inventory: [
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1},
+    %Product{name: "Recipe Product", ttl: -1}
+  ],
+  market_no: "M-0001",
+  max_inventory: 20,
+  max_spread: 5,
+  min_spread: 1,
+  name: "Market",
+  products_bought: 0,
+  products_bought_total: 190,
+  products_sold: 0,
+  products_sold_total: 170,
+  sell_price: 1,
+  spread: 5,
+  supplier: #PID<0.243.0>
+}
+Inventory unchanged 0/0
+Market lowering prices
+Market adjusting spread

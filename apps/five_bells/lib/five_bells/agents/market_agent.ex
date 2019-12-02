@@ -57,9 +57,9 @@ defmodule FiveBells.Agents.MarketAgent do
     # adjust spread if necessary
     # record the state of inventory and prices
     # reset cycle data
-    with :ok <- purchase_inventory(agent),
-         :ok <- adjust_prices(agent),
+    with :ok <- adjust_prices(agent),
          :ok <- adjust_spread(agent),
+         :ok <- purchase_inventory(agent),
          # :ok <- pay_salaries(agent, cycle, simulation_id),
          # :ok <- hire_fire_employees(agent, cycle, simulation_id),
          :ok <- flush_statistics(agent, cycle, simulation_id),
@@ -81,6 +81,13 @@ defmodule FiveBells.Agents.MarketAgent do
   def available_cash(agent), do: account_deposit(agent) - max_inventory(agent) * bid_price(agent)
   def cash_buffer(agent), do: state(agent).cash_buffer
   def deposit_buffer(agent), do: round(account_deposit(agent) / cash_buffer(agent))
+
+  def account(agent) do
+    case BankAgent.get_account(bank(agent), agent) do
+      {:ok, account} -> account
+      err -> err
+    end
+  end
 
   def account_deposit(agent) do
     case BankAgent.get_account_deposit(bank(agent), agent) do
@@ -108,8 +115,7 @@ defmodule FiveBells.Agents.MarketAgent do
     # the main things to consider here are
     # 1. do we have the requested quantity
     # 2. are we willing to go and buy to meet the quantity requirement
-    with :ok <- purchase_inventory(agent, quantity),
-         {:ok, _products} = result <- sell_products(agent, customer, quantity) do
+    with {:ok, _products} = result <- sell_products(agent, customer, quantity) do
       result
     else
       err -> err
@@ -138,6 +144,8 @@ defmodule FiveBells.Agents.MarketAgent do
     # 2. do we have a supplier?
     case needs_to_restock?(agent) do
       true ->
+        IO.puts("#{state(agent).name} purchasing inventory")
+
         case supplier(agent) do
           nil -> {:error, :no_supplier}
           supplier -> FactoryAgent.sell_to_customer(supplier, agent, quantity)
@@ -149,16 +157,25 @@ defmodule FiveBells.Agents.MarketAgent do
   end
 
   def receive_delivery(agent, products) do
-    result = add_to_inventory(agent, products)
-    IO.inspect(state(agent))
-    result
+    IO.puts("#{state(agent).name} receiving inventory of size #{length(products)}")
+
+    case add_to_inventory(agent, products) do
+      :ok -> :ok
+      err -> err
+    end
   end
 
   def purchase_capacity(agent) do
     # here there are two main things to consider
     # 1. how many do we want and have storage for?
     # 2. how many can we afford?
-    min(max_items(agent), round(available_cash(agent) / bid_price(agent)))
+    case inventory_count(agent) < max_inventory(agent) do
+      true ->
+        min(max_items(agent), round(available_cash(agent) / bid_price(agent)))
+
+      false ->
+        0
+    end
   end
 
   #############################################################################
@@ -172,11 +189,8 @@ defmodule FiveBells.Agents.MarketAgent do
     # 3. are we out of stock?
     # 4. can we afford to buy more stock?
     case uses_inventory?(agent) && initiates_purchase?(agent) do
-      true ->
-        out_of_stock?(agent) && max_inventory(agent) - inventory_count(agent) > 0
-
-      false ->
-        false
+      true -> out_of_stock?(agent) && max_items(agent) > 0
+      false -> false
     end
   end
 
@@ -271,7 +285,7 @@ defmodule FiveBells.Agents.MarketAgent do
 
   defp inventory_count(agent), do: length(inventory(agent))
   defp max_inventory(agent), do: state(agent).max_inventory
-  defp max_items(agent), do: max(max_inventory(agent) - inventory_count(agent), 3)
+  defp max_items(agent), do: max_inventory(agent) - inventory_count(agent)
   defp inventory(agent), do: state(agent).inventory
   defp inventory_delta(agent), do: products_bought(agent) - products_sold(agent)
   defp inventory_growing?(agent), do: inventory_delta(agent) > 0
@@ -292,6 +306,8 @@ defmodule FiveBells.Agents.MarketAgent do
   defp spread(agent), do: state(agent).spread
 
   defp adjust_prices(agent) do
+    IO.inspect(:sys.get_state(agent))
+
     cond do
       # inventory is growing lower prices
       inventory_growing?(agent) ->
@@ -303,10 +319,12 @@ defmodule FiveBells.Agents.MarketAgent do
 
       # inventory is unchanged ... take special measures
       inventory_unchanged?(agent) ->
+        IO.puts("Inventory unchanged #{products_bought(agent)}/#{products_sold(agent)}")
+
         cond do
           # since we are probably unable to acquire inventory
           # we raise the price in an attempt to seduce a provider
-          inventory_count(agent) == 0 -> raise_prices(agent)
+          products_bought(agent) > 0 && products_sold(agent) > 0 -> raise_prices(agent)
           # we have inventory but nothing is happening to it so
           # lower prices in an attempt to get rid of some of it
           true -> lower_prices(agent)
@@ -315,8 +333,10 @@ defmodule FiveBells.Agents.MarketAgent do
   end
 
   defp adjust_spread(agent) do
+    IO.puts("#{state(agent).name} adjusting spread")
+
     cond do
-      account_delta(agent) < 0 -> increase_spread(agent, 1)
+      account_delta(agent) > 0 -> increase_spread(agent, 1)
       true -> :ok
     end
   end
@@ -324,7 +344,9 @@ defmodule FiveBells.Agents.MarketAgent do
   defp raise_prices(agent, amount \\ 1) when amount >= 1 do
     # when raising prices we have to be careful to never go above the limit at which we can buy
     cond do
-      available_cash(agent) < deposit_buffer(agent) ->
+      available_cash(agent) > deposit_buffer(agent) ->
+        IO.puts("#{state(agent).name} raising prices")
+
         Agent.update(agent, fn x ->
           %{x | bid_price: x.bid_price + amount, sell_price: x.sell_price + amount}
         end)
@@ -335,8 +357,14 @@ defmodule FiveBells.Agents.MarketAgent do
   end
 
   defp lower_prices(agent, amount \\ 1) when amount >= 1 do
+    IO.puts("#{state(agent).name} lowering prices")
+
     Agent.update(agent, fn x ->
-      %{x | bid_price: min(x.bid_price - amount, 1), sell_price: min(x.sell_price - amount, 1)}
+      %{
+        x
+        | bid_price: max(min(x.bid_price - amount, 1), 1),
+          sell_price: max(min(x.sell_price - amount, 1), 1)
+      }
     end)
   end
 
@@ -347,12 +375,12 @@ defmodule FiveBells.Agents.MarketAgent do
     end)
   end
 
-  # defp decrease_spread(agent, amount) do
-  #   Agent.update(agent, fn x ->
-  #     spread = max(x.min_spread, x.spread - amount)
-  #     %{x | spread: spread, sell_price: x.bid_price * spread}
-  #   end)
-  # end
+  defp decrease_spread(agent, amount) do
+    Agent.update(agent, fn x ->
+      spread = max(x.min_spread, x.spread - amount)
+      %{x | spread: spread, sell_price: x.bid_price * spread}
+    end)
+  end
 
   #############################################################################
   # STATISTICS
@@ -361,6 +389,7 @@ defmodule FiveBells.Agents.MarketAgent do
   def products_sold(agent), do: state(agent).products_sold
   def products_sold_total(agent), do: state(agent).products_sold_total
   def products_bought(agent), do: state(agent).products_bought
+  def products_bought_total(agent), do: state(agent).products_bought_total
 
   defp reset_cycle(agent, cycle) do
     # discard the inventory if required to do so
@@ -370,6 +399,7 @@ defmodule FiveBells.Agents.MarketAgent do
       %{
         x
         | products_sold: 0,
+          products_bought: 0,
           current_cycle: cycle,
           inventory: inventory
       }
@@ -378,7 +408,8 @@ defmodule FiveBells.Agents.MarketAgent do
 
   defp flush_statistics(agent, cycle, simulation_id) do
     with :ok <- flush_price_statistics(agent, cycle, simulation_id),
-         :ok <- flush_inventory_statistics(agent, cycle, simulation_id) do
+         :ok <- flush_inventory_statistics(agent, cycle, simulation_id),
+         :ok <- flush_account_status(agent, cycle, simulation_id) do
       :ok
     else
       err -> err
@@ -458,7 +489,7 @@ defmodule FiveBells.Agents.MarketAgent do
              create_time_series_entry(
                agent,
                "market.products_bought_total",
-               products_bought(agent),
+               products_bought_total(agent),
                cycle,
                simulation_id
              )
@@ -475,6 +506,24 @@ defmodule FiveBells.Agents.MarketAgent do
            ) do
       :ok
     else
+      err -> err
+    end
+  end
+
+  def flush_account_status(agent, cycle, simulation_id) do
+    account = account(agent)
+
+    case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
+           bank: BankAgent.state(bank(agent)).bank_no,
+           account_no: account.account_no,
+           owner_type: "Market",
+           owner_id: state(agent).name,
+           deposit: account.deposit,
+           delta: account.delta,
+           cycle: cycle,
+           simulation_id: simulation_id
+         }) do
+      {:ok, _} -> :ok
       err -> err
     end
   end

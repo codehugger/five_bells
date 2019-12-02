@@ -1,0 +1,20 @@
+<section class="row">
+  <article class="column">
+    <h2>Simulation - <%= @simulation_id %></h2>
+    <h3><%= @entity_type %> - <%= @entity_id %></h3>
+  </article>
+</section>
+
+<div class="row">
+  <div class="column">
+    <%= if @entity_type == "Market" do %>
+      <%= render "market_show.html", time_series: @time_series %>
+    <% end %>
+    <%= if @entity_type == "Factory" do %>
+      <%= render "factory_show.html", time_series: @time_series %>
+    <% end %>
+    <%= if @entity_type == "Bank" do %>
+      <%= render "bank_show.html", time_series: @time_series %>
+    <% end %>
+  </div>
+</div>

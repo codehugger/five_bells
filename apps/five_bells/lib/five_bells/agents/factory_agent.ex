@@ -76,6 +76,13 @@ defmodule FiveBells.Agents.FactoryAgent do
   defp bank(agent), do: state(agent).bank
   defp initial_deposit(agent), do: state(agent).initial_deposit
 
+  def account(agent) do
+    case BankAgent.get_account(bank(agent), agent) do
+      {:ok, account} -> account
+      err -> err
+    end
+  end
+
   def account_deposit(agent) do
     case BankAgent.get_account_deposit(bank(agent), agent) do
       {:ok, deposit} -> deposit
@@ -113,9 +120,13 @@ defmodule FiveBells.Agents.FactoryAgent do
     # 1. how much output do we have remaining given our current staff
     # 2. how much can we afford to produce
     # 3. how much can we store
+    output_remains = output_remaining(agent)
+    afford_output = round(account_deposit(agent) / unit_cost(agent))
+    max_items = max_items(agent)
+
     min(
-      min(output_remaining(agent), round(account_deposit(agent) / unit_cost(agent))),
-      max_items(agent)
+      min(output_remains, afford_output),
+      max_items
     )
   end
 
@@ -128,8 +139,7 @@ defmodule FiveBells.Agents.FactoryAgent do
         Agent.update(agent, fn x ->
           %{
             x
-            | output: x.output - length(produced),
-              units_produced_total: x.units_produced_total + length(produced),
+            | units_produced_total: x.units_produced_total + length(produced),
               units_produced: x.units_produced + length(produced),
               inventory: x.inventory ++ produced
           }
@@ -144,7 +154,7 @@ defmodule FiveBells.Agents.FactoryAgent do
   # Inventory
   #############################################################################
 
-  defp keep_inventory?(agent), do: state(agent).max_inventory <= 0
+  defp keep_inventory?(agent), do: state(agent).max_inventory > 0
   defp inventory(agent), do: state(agent).inventory
   defp inventory_count(agent), do: length(state(agent).inventory)
   defp max_inventory(agent), do: state(agent).max_inventory
@@ -248,7 +258,8 @@ defmodule FiveBells.Agents.FactoryAgent do
   defp flush_statistics(agent, cycle, simulation_id) do
     with :ok <- flush_production_statistics(agent, cycle, simulation_id),
          :ok <- flush_sales_statistics(agent, cycle, simulation_id),
-         :ok <- flush_inventory_statistics(agent, cycle, simulation_id) do
+         :ok <- flush_inventory_statistics(agent, cycle, simulation_id),
+         :ok <- flush_account_status(agent, cycle, simulation_id) do
       :ok
     else
       err -> err
@@ -285,7 +296,7 @@ defmodule FiveBells.Agents.FactoryAgent do
                "factory.output_remaining",
                product_name(agent),
                # correct for this being recorded after the inventory might have been sold
-               output_remaining(agent) + units_produced(agent),
+               output_remaining(agent),
                cycle,
                simulation_id
              )
@@ -339,6 +350,24 @@ defmodule FiveBells.Agents.FactoryAgent do
            ) do
       :ok
     else
+      err -> err
+    end
+  end
+
+  def flush_account_status(agent, cycle, simulation_id) do
+    account = account(agent)
+
+    case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
+           bank: BankAgent.state(bank(agent)).bank_no,
+           account_no: account.account_no,
+           owner_type: "Factory",
+           owner_id: state(agent).name,
+           deposit: account.deposit,
+           delta: account.delta,
+           cycle: cycle,
+           simulation_id: simulation_id
+         }) do
+      {:ok, _} -> :ok
       err -> err
     end
   end

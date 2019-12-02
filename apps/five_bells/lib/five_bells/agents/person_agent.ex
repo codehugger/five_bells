@@ -4,7 +4,7 @@ defmodule FiveBells.Agents.PersonAgent do
   alias FiveBells.Agents.{BankAgent, MarketAgent}
 
   defmodule State do
-    defstruct [:name, :bank, :market, :account_no, initial_deposit: 0, consumed: []]
+    defstruct [:name, :bank, :market, :account_no, initial_deposit: 0, consumed: %{}]
   end
 
   def state(agent), do: Agent.get(agent, & &1)
@@ -26,7 +26,7 @@ defmodule FiveBells.Agents.PersonAgent do
     end
   end
 
-  def evaluate(agent, _cycle, _simulation_id) do
+  def evaluate(agent, cycle, simulation_id) do
     case purchase(agent) do
       {:ok, product} ->
         consume(agent, product)
@@ -34,6 +34,8 @@ defmodule FiveBells.Agents.PersonAgent do
       {:error, _} = err ->
         err
     end
+
+    flush_statistics(agent, cycle, simulation_id)
   end
 
   #############################################################################
@@ -42,9 +44,11 @@ defmodule FiveBells.Agents.PersonAgent do
 
   def bank(agent), do: Agent.get(agent, & &1.bank)
   def initial_deposit(agent), do: Agent.get(agent, & &1.initial_deposit)
-  def account(agent), do: BankAgent.get_account(bank(agent), agent)
-  def account_deposit(agent), do: BankAgent.get_account_deposit(bank(agent), agent)
-  def account_no(agent), do: BankAgent.get_account_no(bank(agent), agent)
+
+  def account(agent) do
+    {:ok, account} = BankAgent.get_account(bank(agent), agent)
+    account
+  end
 
   defp open_deposit_account(agent) do
     cond do
@@ -63,9 +67,15 @@ defmodule FiveBells.Agents.PersonAgent do
   # Consumption
   #############################################################################
 
+  def consumed_total(agent) do
+    Enum.reduce(state(agent).consumed, 0, fn {_key, val}, sum -> sum + val end)
+  end
+
   def consume(agent, product) do
     # IO.puts("#{state(agent).name} consumed #{inspect(product)}")
-    Agent.update(agent, fn x -> %{x | consumed: [product | x.consumed]} end)
+    Agent.update(agent, fn x ->
+      %{x | consumed: Map.update(x.consumed, product.name, 1, fn x -> x + 1 end)}
+    end)
   end
 
   #############################################################################
@@ -74,8 +84,10 @@ defmodule FiveBells.Agents.PersonAgent do
 
   def market(agent), do: Agent.get(agent, & &1.market)
 
+  def purchased_total(_agent), do: 0
+
   def purchase(agent) do
-    {:ok, deposit} = account_deposit(agent)
+    deposit = account(agent).deposit
     price = MarketAgent.sell_price(market(agent))
 
     cond do
@@ -88,15 +100,118 @@ defmodule FiveBells.Agents.PersonAgent do
         {:error, :no_funds}
 
       true ->
-        case MarketAgent.sell_to_customer(market(agent), agent) do
-          {:ok, _product} = resp ->
-            # IO.puts("#{name(agent)} bought #{inspect(product)} at #{price}")
-            resp
+        case MarketAgent.sell_to_customer(market(agent), agent, 1) do
+          {:ok, [product | _]} = _resp ->
+            IO.puts("#{state(agent).name} bought #{inspect(product)} at #{price}")
+            {:ok, product}
 
-          {:error, _reason} = err ->
-            # IO.puts("#{name(agent)} unable to acquired product from market #{inspect(reason)}")
+          {:error, reason} = err ->
+            IO.puts(
+              "#{state(agent).name} unable to acquired product from market #{inspect(reason)}"
+            )
+
             err
         end
     end
+  end
+
+  #############################################################################
+  # Statistics
+  #############################################################################
+
+  defp flush_statistics(agent, cycle, simulation_id) do
+    with :ok <- flush_account_statistics(agent, cycle, simulation_id),
+         :ok <- flush_purchase_statistics(agent, cycle, simulation_id),
+         :ok <- flush_consumption_statistics(agent, cycle, simulation_id),
+         :ok <- flush_account_status(agent, cycle, simulation_id) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  defp flush_account_statistics(agent, cycle, simulation_id) do
+    account = account(agent)
+
+    with {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "person.account_deposit",
+               account.deposit,
+               cycle,
+               simulation_id
+             )
+           ) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  defp flush_purchase_statistics(agent, cycle, simulation_id) do
+    with {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "person.purchased_total",
+               purchased_total(agent),
+               cycle,
+               simulation_id
+             )
+           ) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  defp flush_consumption_statistics(agent, cycle, simulation_id) do
+    with {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "person.consumed_total",
+               consumed_total(agent),
+               cycle,
+               simulation_id
+             )
+           ) do
+      :ok
+    else
+      err -> err
+    end
+  end
+
+  def flush_account_status(agent, cycle, simulation_id) do
+    account = account(agent)
+
+    case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
+           bank: BankAgent.state(bank(agent)).bank_no,
+           account_no: account.account_no,
+           owner_type: "Person",
+           owner_id: state(agent).name,
+           deposit: account.deposit,
+           delta: account.delta,
+           cycle: cycle,
+           simulation_id: simulation_id
+         }) do
+      {:ok, _} -> :ok
+      err -> err
+    end
+  end
+
+  defp create_time_series_entry(agent, label, value, cycle, simulation_id) do
+    person = state(agent)
+
+    %FiveBells.Statistics.TimeSeries{
+      entity_type: "Person",
+      entity_id: "#{person.name}",
+      label: label,
+      key: "#{person.name}",
+      value: value,
+      cycle: cycle,
+      simulation_id: simulation_id
+    }
   end
 end

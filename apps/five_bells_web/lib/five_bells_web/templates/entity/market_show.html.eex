@@ -1,0 +1,28 @@
+<div>
+  <strong>market.sell_price</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.sell_price"]) %>
+</div>
+<div>
+  <strong>market.bid_price</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.bid_price"]) %>
+</div>
+<div>
+  <strong>market.spread</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.spread"]) %>
+</div>
+<div>
+  <strong>market.products_sold</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold"]) %>
+</div>
+<div>
+  <strong>market.products_sold_total</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold_total"]) %>
+</div>
+<div>
+  <strong>market.products_bought</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought"]) %>
+</div>
+<div>
+  <strong>market.products_bought_total</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought_total"]) %>
+</div>

@@ -10,21 +10,21 @@ alias FiveBells.Agents.{BankAgent, MarketAgent, FactoryAgent, PersonAgent, Simul
   FactoryAgent.start_link(
     bank: bank,
     initial_deposit: 100,
-    output: 10,
-    max_inventory: 10,
+    output: 100,
+    max_inventory: 100,
     initiate_sale: true
   )
 
 {:ok, market} =
-  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 100, max_inventory: 10)
+  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 100, max_inventory: 20)
 
 :ok = FactoryAgent.set_market(factory, market)
 
 # People
 people =
-  Enum.map(1..20, fn x ->
+  Enum.map(1..40, fn x ->
     {:ok, person} =
-      PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 10)
+      PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 20)
 
     person
   end)
@@ -34,6 +34,9 @@ from(t in FiveBells.Statistics.TimeSeries, where: t.simulation_id == "naive_cons
 |> FiveBells.Repo.delete_all()
 
 from(t in FiveBells.Banks.Transaction, where: t.simulation_id == "naive_consumption")
+|> FiveBells.Repo.delete_all()
+
+from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "naive_consumption")
 |> FiveBells.Repo.delete_all()
 
 # Sanity tests
@@ -50,13 +53,8 @@ from(t in FiveBells.Banks.Transaction, where: t.simulation_id == "naive_consumpt
 # [person | _] = people
 # PersonAgent.evaluate(person, 1)
 
-Enum.each(1..2, fn _ ->
+Enum.each(1..30, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
-    # let the market and the factories try to trade products before
-    # letting people have a go at buying
-    MarketAgent.evaluate(market, cycle, simulation_id)
-    FactoryAgent.evaluate(factory, cycle, simulation_id)
-
     people
     |> Enum.shuffle()
     |> Enum.each(fn person ->
@@ -65,6 +63,10 @@ Enum.each(1..2, fn _ ->
         _ -> true
       end
     end)
+
+    # market and factory communication happens at the end of the day (restocking)
+    FactoryAgent.evaluate(factory, cycle, simulation_id)
+    MarketAgent.evaluate(market, cycle, simulation_id)
 
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)

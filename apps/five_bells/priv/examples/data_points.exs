@@ -12,7 +12,7 @@ series =
     )
   )
 
-IO.inspect(Enum.group_by(series, fn s -> s.label end, fn s -> [s.cycle, s.value] end))
+# IO.inspect(Enum.group_by(series, fn s -> s.label end, fn s -> [s.cycle, s.value] end))
 
 # labelled_series =
 #   Enum.group_by(

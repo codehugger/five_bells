@@ -1,0 +1,24 @@
+<div>
+  <strong>factory.units_sold</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold"]) %>
+</div>
+<div>
+  <strong>factory.units_sold_total</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold_total"]) %>
+</div>
+<div>
+  <strong>factory.inventory_count</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.inventory_count"]) %>
+</div>
+<div>
+  <strong>factory.units_produced</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced"]) %>
+</div>
+<div>
+  <strong>factory.units_produced_total</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced_total"]) %>
+</div>
+<div>
+  <strong>factory.output_remaining</strong>
+  <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.output_remaining"]) %>
+</div>

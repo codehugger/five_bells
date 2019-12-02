@@ -43,8 +43,6 @@ defmodule FiveBellsWeb.SimulationController do
       )
       |> Enum.group_by(fn s -> s.label end, fn s -> [s.cycle, s.value] end)
 
-    IO.inspect(totals)
-
     render(conn, "show.html", entities: entities, time_series: time_series, totals: totals, id: id)
   end
 end

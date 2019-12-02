@@ -123,6 +123,16 @@ defmodule FiveBells.Agents.BankAgent do
     end
   end
 
+  def get_account_owner(agent, account_no) when is_binary(account_no) do
+    case state(agent).owner_registry[account_no] do
+      nil ->
+        {:error, :account_not_found}
+
+      owner_pid ->
+        {:ok, Process.info(owner_pid)}
+    end
+  end
+
   def open_deposit_account(agent, owner, initial_deposit \\ 0)
       when is_pid(owner) and is_number(initial_deposit) do
     case Bank.open_deposit_account(bank(agent)) do
@@ -414,7 +424,6 @@ defmodule FiveBells.Agents.BankAgent do
   defp flush_loan_statistics(agent, _cycle, _simulation_id) do
     Enum.each(bank(agent).unpaid_loans, fn {_account_no, _loan} ->
       nil
-      # IO.inspect(loan)
     end)
   end
 end
