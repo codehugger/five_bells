@@ -93,7 +93,13 @@ defmodule FiveBells.Agents.FactoryAgent do
   defp open_deposit_account(agent) do
     cond do
       bank(agent) != nil ->
-        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
+        case BankAgent.open_deposit_account(
+               bank(agent),
+               agent,
+               "Factory",
+               state(agent).factory_no,
+               initial_deposit(agent)
+             ) do
           {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
           {:error, _} = err -> err
         end

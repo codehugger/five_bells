@@ -84,6 +84,9 @@ from(t in FiveBells.Statistics.TimeSeries, where: t.simulation_id == "borrower")
 from(t in FiveBells.Banks.Transaction, where: t.simulation_id == "borrower")
 |> FiveBells.Repo.delete_all()
 
+from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "borrower")
+|> FiveBells.Repo.delete_all()
+
 Enum.each(1..10, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
     BankAgent.evaluate(bank, cycle, simulation_id)

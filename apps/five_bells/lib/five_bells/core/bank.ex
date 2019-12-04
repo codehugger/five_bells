@@ -2,8 +2,6 @@ defmodule Bank do
   defstruct [
     :central_bank,
     ledgers: %{},
-    unpaid_loans: %{},
-    paid_loans: %{},
     transactions: []
   ]
 
@@ -33,19 +31,9 @@ defmodule Bank do
                    payment.interest,
                    "Loan - interest payment"
                  ),
-               {:ok, loan} <- Loan.make_payment(loan) do
-            case Loan.paid_off?(loan) do
-              false ->
-                {:ok, %{bank | unpaid_loans: Map.put(bank.unpaid_loans, account_no, loan)}}
-
-              true ->
-                {:ok,
-                 %{
-                   bank
-                   | unpaid_loans: Map.delete(bank.unpaid_loans, account_no),
-                     paid_loans: Map.update(bank.paid_loans, account_no, [loan], &[loan | &1])
-                 }}
-            end
+               {:ok, loan} <- Loan.make_payment(loan),
+               {:ok, ledger} <- Ledger.make_payment(bank.ledgers["loan"], account_no, loan) do
+            {:ok, %{bank | ledgers: Map.put(bank.ledgers, "loan", ledger)}}
           else
             err -> err
           end
@@ -72,34 +60,25 @@ defmodule Bank do
         duration \\ 12,
         interest_rate \\ 0.0
       ) do
-    case bank.unpaid_loans[account_no] do
-      nil ->
-        loan =
-          %Loan{
-            principal: amount,
-            duration: duration,
-            interest_rate: interest_rate
-          }
-          |> Loan.calculate_payments()
-
-        case transfer(bank, "loan", account_no, amount, "Loan request transfer") do
-          {:ok, bank} ->
-            {:ok, %{bank | unpaid_loans: Map.put_new(bank.unpaid_loans, account_no, loan)}}
-
-          err ->
-            err
-        end
-
-      _ ->
-        {:error, :account_has_outstanding_loan}
+    with {:ok, bank} <- transfer(bank, "loan", account_no, amount, "Loan request transfer"),
+         {:ok, ledger} <-
+           Ledger.request_loan(bank.ledgers["loan"], account_no, amount, duration, interest_rate) do
+      {:ok,
+       %{
+         bank
+         | ledgers: Map.put(bank.ledgers, "loan", ledger)
+       }}
+    else
+      err ->
+        err
     end
   end
 
   def get_loan(%Bank{} = bank, account_no, type \\ :unpaid) do
     loan =
       case type do
-        :unpaid -> bank.unpaid_loans[account_no]
-        :paid -> bank.paid_loans[account_no]
+        :unpaid -> bank.ledgers["loan"].unpaid_loans[account_no]
+        :paid -> bank.ledgers["loan"].paid_loans[account_no]
       end
 
     case loan do
@@ -205,7 +184,9 @@ defmodule Bank do
   def add_account(
         %Bank{} = bank,
         ledger_name,
-        account_no \\ nil
+        account_no \\ nil,
+        owner_type \\ nil,
+        owner_id \\ nil
       )
       when is_binary(ledger_name) do
     case bank.ledgers[ledger_name] do
@@ -213,7 +194,7 @@ defmodule Bank do
         {:error, {:ledger_not_found, ledger_name}}
 
       ledger ->
-        case Ledger.add_account(ledger, account_no) do
+        case Ledger.add_account(ledger, account_no, owner_type, owner_id) do
           {:ok, ledger, acc_no} ->
             {:ok, %{bank | ledgers: Map.put(bank.ledgers, ledger_name, ledger)}, acc_no}
 
@@ -236,8 +217,8 @@ defmodule Bank do
     end
   end
 
-  def open_deposit_account(%Bank{} = bank) do
-    case add_account(bank, "deposit") do
+  def open_deposit_account(%Bank{} = bank, owner_type \\ nil, owner_id \\ nil) do
+    case add_account(bank, "deposit", nil, owner_type, owner_id) do
       {:ok, _bank, _account_no} = resp -> resp
       {:error, _} = error -> error
     end
@@ -298,7 +279,7 @@ defmodule Bank do
   end
 
   def total_outstanding_capital(%Bank{} = bank) do
-    Enum.reduce(bank.unpaid_loans, 0, fn {_acc_no, loan}, sum ->
+    Enum.reduce(bank.ledgers["loan"].unpaid_loans, 0, fn {_acc_no, loan}, sum ->
       sum + Loan.outstanding_capital(loan)
     end)
   end

@@ -47,13 +47,14 @@ defmodule FiveBells.Agents.BorrowerAgent do
         end
 
       {:error, :loan_not_found} ->
-        BankAgent.request_loan(
-          bank(agent),
-          agent,
-          loan_amount(agent),
-          loan_duration(agent),
-          interest_rate(agent)
-        )
+        :ok =
+          BankAgent.request_loan(
+            bank(agent),
+            agent,
+            loan_amount(agent),
+            loan_duration(agent),
+            interest_rate(agent)
+          )
     end
 
     flush_account_status(agent, cycle, simulation_id)
@@ -77,7 +78,13 @@ defmodule FiveBells.Agents.BorrowerAgent do
   defp open_deposit_account(agent) do
     cond do
       bank(agent) != nil ->
-        case BankAgent.open_deposit_account(bank(agent), agent, initial_deposit(agent)) do
+        case BankAgent.open_deposit_account(
+               bank(agent),
+               agent,
+               "Borrower",
+               state(agent).person_no,
+               initial_deposit(agent)
+             ) do
           {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
           {:error, _} = err -> err
         end
@@ -98,6 +105,8 @@ defmodule FiveBells.Agents.BorrowerAgent do
 
   def flush_account_status(agent, cycle, simulation_id) do
     account = account(agent)
+
+    IO.inspect(account)
 
     case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
            bank_no: BankAgent.state(bank(agent)).bank_no,

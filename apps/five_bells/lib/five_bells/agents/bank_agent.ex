@@ -133,9 +133,9 @@ defmodule FiveBells.Agents.BankAgent do
     end
   end
 
-  def open_deposit_account(agent, owner, initial_deposit \\ 0)
+  def open_deposit_account(agent, owner, owner_type, owner_id, initial_deposit \\ 0)
       when is_pid(owner) and is_number(initial_deposit) do
-    case Bank.open_deposit_account(bank(agent)) do
+    case Bank.open_deposit_account(bank(agent), owner_type, owner_id) do
       {:ok, bank, account_no} ->
         # Update bank after account is added
         Agent.update(agent, fn x -> %{x | bank: bank} end)
@@ -422,7 +422,7 @@ defmodule FiveBells.Agents.BankAgent do
   end
 
   defp flush_loan_statistics(agent, _cycle, _simulation_id) do
-    Enum.each(bank(agent).unpaid_loans, fn {_account_no, _loan} ->
+    Enum.each(bank(agent).ledgers["loan"].unpaid_loans, fn {_account_no, _loan} ->
       nil
     end)
   end

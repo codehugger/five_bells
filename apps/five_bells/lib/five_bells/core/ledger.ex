@@ -6,6 +6,8 @@ defmodule Ledger do
     ledger_type: "cash",
     account_type: "asset",
     accounts: %{},
+    unpaid_loans: %{},
+    paid_loans: %{},
     delta: 0
   ]
 
@@ -14,12 +16,14 @@ defmodule Ledger do
   #############################################################################
 
   def add_account(%Ledger{} = ledger), do: add_account(ledger, nil)
+  def add_account(_ledger, _account_no \\ nil, _owner_type \\ nil, _owner_id \\ nil)
 
-  def add_account(%Ledger{} = ledger, account_no) when account_no == nil do
-    add_account(ledger, generate_account_no(ledger))
+  def add_account(%Ledger{} = ledger, account_no, owner_type, owner_id)
+      when account_no == nil do
+    add_account(ledger, generate_account_no(ledger), owner_type, owner_id)
   end
 
-  def add_account(%Ledger{accounts: accounts} = ledger, account_no)
+  def add_account(%Ledger{accounts: accounts} = ledger, account_no, owner_type, owner_id)
       when is_binary(account_no) do
     case Map.has_key?(accounts, account_no) do
       true ->
@@ -29,7 +33,12 @@ defmodule Ledger do
         {:ok,
          %{
            ledger
-           | accounts: Map.put(accounts, account_no, %Account{account_no: account_no})
+           | accounts:
+               Map.put(accounts, account_no, %Account{
+                 account_no: account_no,
+                 owner_type: owner_type,
+                 owner_id: owner_id
+               })
          }, account_no}
     end
   end
@@ -37,6 +46,57 @@ defmodule Ledger do
   defp generate_account_no(%Ledger{} = ledger) do
     "#{length(Map.keys(ledger.accounts)) + 1}"
     |> String.pad_leading(4, "0")
+  end
+
+  #############################################################################
+  # Loans
+  #############################################################################
+
+  def request_loan(%Ledger{} = ledger, account_no, amount, duration, interest_rate) do
+    loan =
+      %Loan{
+        principal: amount,
+        duration: duration,
+        interest_rate: interest_rate
+      }
+      |> Loan.calculate_payments()
+
+    add_loan(ledger, account_no, loan)
+  end
+
+  def add_loan(%Ledger{} = ledger, account_no, %Loan{} = loan) do
+    case ledger.unpaid_loans[account_no] do
+      nil ->
+        {:ok, %{ledger | unpaid_loans: Map.put_new(ledger.unpaid_loans, account_no, loan)}}
+
+      _ ->
+        {:error, :account_has_outstanding_loan}
+    end
+  end
+
+  def make_payment(%Ledger{} = ledger, account_no, %Loan{} = loan) do
+    case Loan.paid_off?(loan) do
+      false ->
+        {:ok,
+         %{
+           ledger
+           | unpaid_loans: Map.put(ledger.unpaid_loans, account_no, loan)
+         }}
+
+      true ->
+        {:ok,
+         %{
+           ledger
+           | unpaid_loans: Map.delete(ledger.unpaid_loans, account_no),
+             paid_loans:
+               Map.update(
+                 ledger.paid_loans,
+                 account_no,
+                 [loan],
+                 &[loan | &1]
+               )
+         }}
+    end
   end
 
   #############################################################################
