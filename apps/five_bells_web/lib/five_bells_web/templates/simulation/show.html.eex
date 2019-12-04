@@ -9,7 +9,7 @@
     <ul>
       <%= for entity <- Enum.filter(@entities, fn x -> x.entity_type == "Bank" end) do %>
       <li>
-        <a href="/<%= entity.simulation_id %>/entities/<%= entity.entity_id %>"><%= entity.entity_id %></a>
+        <a href="/<%= entity.simulation_id %>/banks/<%= entity.entity_id %>"><%= entity.entity_id %></a>
       </li>
       <% end %>
     </ul>

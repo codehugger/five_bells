@@ -42,6 +42,19 @@ defmodule FiveBellsWeb.EntityController do
           )
       end
 
+    accounts =
+      case entity_type do
+        "Bank" ->
+          FiveBells.Repo.all(
+            from(t in Deposit,
+              where: t.simulation_id == ^simulation_id
+            )
+          )
+
+        _ ->
+          []
+      end
+
     transactions =
       case entity_type do
         "Bank" ->
@@ -57,6 +70,7 @@ defmodule FiveBellsWeb.EntityController do
       end
 
     render(conn, "show.html",
+      accounts: accounts,
       deposits: deposits,
       transactions: transactions,
       time_series: time_series,

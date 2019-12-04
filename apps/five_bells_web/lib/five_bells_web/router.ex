@@ -19,6 +19,7 @@ defmodule FiveBellsWeb.Router do
     get("/", SimulationController, :index)
     get("/:id", SimulationController, :show)
     get("/:simulation_id/entities/:entity_id", EntityController, :show)
+    get("/:simulation_id/banks/:bank_id", BankController, :show)
   end
 
   # Other scopes may use custom stacks.

@@ -24,19 +24,49 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 {:ok, bank} = BankAgent.start_link()
 
 {:ok, borrower1} =
-  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+  BorrowerAgent.start_link(
+    person_no: "R-0001",
+    bank: bank,
+    loan_amount: 1200,
+    interest_rate: 10.0,
+    loan_duration: 12
+  )
 
 {:ok, borrower2} =
-  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+  BorrowerAgent.start_link(
+    person_no: "R-0002",
+    bank: bank,
+    loan_amount: 1200,
+    interest_rate: 10.0,
+    loan_duration: 12
+  )
 
 {:ok, borrower3} =
-  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+  BorrowerAgent.start_link(
+    person_no: "R-0003",
+    bank: bank,
+    loan_amount: 1200,
+    interest_rate: 10.0,
+    loan_duration: 12
+  )
 
 {:ok, borrower4} =
-  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+  BorrowerAgent.start_link(
+    person_no: "R-0004",
+    bank: bank,
+    loan_amount: 1200,
+    interest_rate: 10.0,
+    loan_duration: 12
+  )
 
 {:ok, borrower5} =
-  BorrowerAgent.start_link(bank: bank, loan_amount: 1200, interest_rate: 10.0, loan_duration: 12)
+  BorrowerAgent.start_link(
+    person_no: "R-0005",
+    bank: bank,
+    loan_amount: 1200,
+    interest_rate: 10.0,
+    loan_duration: 12
+  )
 
 # Enum.each(1..20, fn cycle ->
 #   BankAgent.evaluate(bank, cycle)

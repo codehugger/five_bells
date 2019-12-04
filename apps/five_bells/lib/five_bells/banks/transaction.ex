@@ -17,7 +17,7 @@ defmodule FiveBells.Banks.Transaction do
   @doc false
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:deb_no, :cred_no, :amount, :text, :cycle, :bank, :simulation_id])
-    |> validate_required([:deb_no, :cred_no, :amount, :text, :cycle, :bank, :simulation_id])
+    |> cast(attrs, [:deb_no, :cred_no, :amount, :text, :cycle, :bank_no, :simulation_id])
+    |> validate_required([:deb_no, :cred_no, :amount, :text, :cycle, :bank_no, :simulation_id])
   end
 end
