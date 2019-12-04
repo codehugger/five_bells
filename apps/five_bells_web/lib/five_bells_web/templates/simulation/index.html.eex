@@ -1,12 +1,8 @@
-<section class="row">
-  <article class="column">
-    <h2>Simulations</h2>
-    <ul>
-      <%= for simulation <- @simulations do %>
-        <li>
-          <a href="/simulations/<%= simulation.simulation_id %>"><%= simulation.simulation_id %></a>
-        </li>
-      <% end %>
-    </ul>
-  </article>
-</section>
+<h2>Simulations</h2>
+<ul>
+  <%= for simulation <- @simulations do %>
+    <li>
+      <a href="/<%= simulation.simulation_id %>"><%= simulation.simulation_id %></a>
+    </li>
+  <% end %>
+</ul>

@@ -16,10 +16,9 @@ defmodule FiveBellsWeb.Router do
   scope "/", FiveBellsWeb do
     pipe_through(:browser)
 
-    get("/", PageController, :index)
-    get("/simulations", SimulationController, :index)
-    get("/simulations/:id", SimulationController, :show)
-    get("/simulations/:simulation_id/entities/:entity_id", EntityController, :show)
+    get("/", SimulationController, :index)
+    get("/:id", SimulationController, :show)
+    get("/:simulation_id/entities/:entity_id", EntityController, :show)
   end
 
   # Other scopes may use custom stacks.

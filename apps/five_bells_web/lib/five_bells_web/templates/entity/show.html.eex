@@ -1,20 +1,13 @@
-<section class="row">
-  <article class="column">
-    <h2>Simulation - <%= @simulation_id %></h2>
-    <h3><%= @entity_type %> - <%= @entity_id %></h3>
-  </article>
-</section>
-
-<div class="row">
-  <div class="column">
-    <%= if @entity_type == "Market" do %>
-      <%= render "market_show.html", time_series: @time_series %>
-    <% end %>
-    <%= if @entity_type == "Factory" do %>
-      <%= render "factory_show.html", time_series: @time_series %>
-    <% end %>
-    <%= if @entity_type == "Bank" do %>
-      <%= render "bank_show.html", time_series: @time_series %>
-    <% end %>
-  </div>
-</div>
+<h1>Simulation - <%= @simulation_id %></h1>
+<%= if @entity_type == "Market" do %>
+<h2>Market - <%= @entity_id %></h2>
+<%= render "market_show.html", time_series: @time_series %>
+<% end %>
+<%= if @entity_type == "Factory" do %>
+<h2>Factory - <%= @entity_id %></h2>
+<%= render "factory_show.html", time_series: @time_series %>
+<% end %>
+<%= if @entity_type == "Bank" do %>
+<h2>Bank - <%= @entity_id %></h2>
+<%= render "bank_show.html", time_series: @time_series, transactions: @transactions %>
+<% end %>

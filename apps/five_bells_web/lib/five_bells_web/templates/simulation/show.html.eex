@@ -1,68 +1,68 @@
-<section class="row">
-  <article class="column">
-    <h2>Simulation - <%= @id %></h2>
-  </article>
-</section>
-
-<section class="row">
-  <article class="column">
-    <h3>Entities</h3>
+<div class="row">
+  <div class="col">
+    <h1>Simulation - <%= @id %></h1>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <h2>Banks</h2>
     <ul>
-      <%= for entity <- @entities do %>
-        <li>
-          <a href="/simulations/<%= entity.simulation_id %>/entities/<%= entity.entity_id %>"><%= entity.entity_id %></a>
-        </li>
+      <%= for entity <- Enum.filter(@entities, fn x -> x.entity_type == "Bank" end) do %>
+      <li>
+        <a href="/<%= entity.simulation_id %>/entities/<%= entity.entity_id %>"><%= entity.entity_id %></a>
+      </li>
       <% end %>
     </ul>
-  </article>
-</section>
-
-<div class="row">
-  <div class="column">
-    <h3>Totals</h3>
-      <%= for {key, values} <- @totals do %>
-        <div class="row">
-        <div class="column">
-        <h4><%= key %></h4>
-        <div>
-        <%= raw Chartkick.line_chart Jason.encode!(values) %>
-        </div>
-        </div>
-        </div>
+  </div>
+  <div class="col">
+    <h2>Markets</h2>
+    <ul>
+      <%= for entity <- Enum.filter(@entities, fn x -> x.entity_type == "Market" end) do %>
+      <li>
+        <a href="/<%= entity.simulation_id %>/entities/<%= entity.entity_id %>"><%= entity.entity_id %></a>
+      </li>
       <% end %>
-    </div>
+    </ul>
+  </div>
+  <div class="col">
+    <h2>Factories</h2>
+    <ul>
+      <%= for entity <- Enum.filter(@entities, fn x -> x.entity_type == "Factory" end) do %>
+      <li>
+        <a href="/<%= entity.simulation_id %>/entities/<%= entity.entity_id %>"><%= entity.entity_id %></a>
+      </li>
+      <% end %>
+    </ul>
   </div>
 </div>
 
-<!--
-<section class="row">
-  <article class="column">
-    <h3>Datapoints</h3>
-    <table>
-      <thead>
-        <tr>
-          <td>id</td>
-          <td>label</td>
-          <td>key</td>
-          <td>entity_type</td>
-          <td>entity_id</td>
-          <td>value</td>
-          <td>cycle</td>
-        </tr>
-      <thead>
-      <tbody>
-        <%= for t <- @time_series do %>
-          <tr>
-            <td><%= t.id %></td>
-            <td><%= t.label %></td>
-            <td><%= t.key %></td>
-            <td><%= t.entity_type %></td>
-            <td><%= t.entity_id %></td>
-            <td><%= t.value %></td>
-            <td><%= t.cycle %></td>
-          <tr>
-        <% end %>
-    </ul>
-  </article>
-</section>
--->
+<div class="row">
+  <%= for {key, values} <- @totals do %>
+  <div class="p-3 col-6">
+    <div class="card">
+      <div class="card-header"><%= key %></div>
+      <div class="card-body">
+        <%= raw Chartkick.line_chart Jason.encode!(values) %>
+      </div>
+    </div>
+  </div>
+  <% end %>
+</div>
+
+<div class="row">
+  <div class="col">
+    <h2>People</h2>
+    <table class="table table-striped table-sm">
+    <thead>
+      <td>Name</td>
+    </thead>
+    <tbody>
+      <%= for entity <- Enum.filter(@entities, fn x -> x.entity_type == "Person" or x.entity_type == "Borrower" end) do %>
+      <tr>
+        <td><%= entity.entity_id %></td>
+      </tr>
+      <% end %>
+    </tbody>
+    </table>
+  </div>
+</div>
