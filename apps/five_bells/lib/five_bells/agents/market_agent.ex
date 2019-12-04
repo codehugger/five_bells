@@ -306,8 +306,6 @@ defmodule FiveBells.Agents.MarketAgent do
   defp spread(agent), do: state(agent).spread
 
   defp adjust_prices(agent) do
-    IO.inspect(:sys.get_state(agent))
-
     cond do
       # inventory is growing lower prices
       inventory_growing?(agent) ->
@@ -337,6 +335,7 @@ defmodule FiveBells.Agents.MarketAgent do
 
     cond do
       account_delta(agent) > 0 -> increase_spread(agent, 1)
+      account_delta(agent) == 0 -> decrease_spread(agent, 1)
       true -> :ok
     end
   end

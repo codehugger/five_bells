@@ -109,7 +109,7 @@ defmodule FiveBells.Agents.FactoryAgent do
 
   def product_name(agent), do: recipe(agent).product_name
   defp recipe(agent), do: state(agent).recipe
-  defp can_output?(agent), do: output_remaining(agent) > 0
+  defp can_output?(agent), do: output_remaining(agent) > 0 && max_items(agent) > 0
   defp units_produced(agent), do: state(agent).units_produced
   defp units_produced_total(agent), do: state(agent).units_produced_total
   defp output_remaining(agent), do: state(agent).output - units_produced(agent)
@@ -123,6 +123,8 @@ defmodule FiveBells.Agents.FactoryAgent do
     output_remains = output_remaining(agent)
     afford_output = round(account_deposit(agent) / unit_cost(agent))
     max_items = max_items(agent)
+
+    IO.puts(max_items)
 
     min(
       min(output_remains, afford_output),
@@ -158,7 +160,7 @@ defmodule FiveBells.Agents.FactoryAgent do
   defp inventory(agent), do: state(agent).inventory
   defp inventory_count(agent), do: length(state(agent).inventory)
   defp max_inventory(agent), do: state(agent).max_inventory
-  defp max_items(agent), do: max(max_inventory(agent) - inventory_count(agent), 3)
+  defp max_items(agent), do: max_inventory(agent) - inventory_count(agent)
 
   def discard_inventory(agent) do
     case keep_inventory?(agent) do

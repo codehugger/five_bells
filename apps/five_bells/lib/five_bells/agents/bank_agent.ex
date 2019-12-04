@@ -295,7 +295,7 @@ defmodule FiveBells.Agents.BankAgent do
         Map.from_struct(t)
         |> Map.merge(%{
           cycle: cycle,
-          bank: state(agent).name,
+          bank: state(agent).bank_no,
           simulation_id: simulation_id
         })
       end)

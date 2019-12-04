@@ -10,13 +10,13 @@ alias FiveBells.Agents.{BankAgent, MarketAgent, FactoryAgent, PersonAgent, Simul
   FactoryAgent.start_link(
     bank: bank,
     initial_deposit: 100,
-    output: 100,
+    output: 10,
     max_inventory: 100,
     initiate_sale: true
   )
 
 {:ok, market} =
-  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 100, max_inventory: 20)
+  MarketAgent.start_link(bank: bank, supplier: factory, initial_deposit: 50, max_inventory: 20)
 
 :ok = FactoryAgent.set_market(factory, market)
 
