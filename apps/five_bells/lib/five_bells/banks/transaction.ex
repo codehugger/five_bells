@@ -3,13 +3,13 @@ defmodule FiveBells.Banks.Transaction do
   import Ecto.Changeset
 
   schema "transactions" do
-    field :amount, :integer
-    field :bank, :string
-    field :cred_no, :string
-    field :cycle, :integer
-    field :deb_no, :string
-    field :simulation_id, :string
-    field :text, :string
+    field(:amount, :integer)
+    field(:bank_no, :string)
+    field(:cred_no, :string)
+    field(:cycle, :integer)
+    field(:deb_no, :string)
+    field(:simulation_id, :string)
+    field(:text, :string)
 
     timestamps()
   end

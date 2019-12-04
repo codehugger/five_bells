@@ -3,7 +3,7 @@ defmodule FiveBells.Banks.Deposit do
   import Ecto.Changeset
 
   schema "deposits" do
-    field(:bank, :string)
+    field(:bank_no, :string)
     field(:account_no, :string)
     field(:owner_type, :string)
     field(:owner_id, :string)

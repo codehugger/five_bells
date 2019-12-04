@@ -4,7 +4,7 @@ defmodule FiveBells.Agents.PersonAgent do
   alias FiveBells.Agents.{BankAgent, MarketAgent}
 
   defmodule State do
-    defstruct [:name, :bank, :market, :account_no, initial_deposit: 0, consumed: %{}]
+    defstruct [:name, :person_no, :bank, :market, :account_no, initial_deposit: 0, consumed: %{}]
   end
 
   def state(agent), do: Agent.get(agent, & &1)
@@ -187,10 +187,10 @@ defmodule FiveBells.Agents.PersonAgent do
     account = account(agent)
 
     case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
-           bank: BankAgent.state(bank(agent)).bank_no,
+           bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
            owner_type: "Person",
-           owner_id: state(agent).name,
+           owner_id: state(agent).person_no,
            deposit: account.deposit,
            delta: account.delta,
            cycle: cycle,

@@ -24,7 +24,13 @@ alias FiveBells.Agents.{BankAgent, MarketAgent, FactoryAgent, PersonAgent, Simul
 people =
   Enum.map(1..40, fn x ->
     {:ok, person} =
-      PersonAgent.start_link(name: "Person#{x}", bank: bank, market: market, initial_deposit: 20)
+      PersonAgent.start_link(
+        name: "Person#{x}",
+        person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
+        bank: bank,
+        market: market,
+        initial_deposit: 20
+      )
 
     person
   end)

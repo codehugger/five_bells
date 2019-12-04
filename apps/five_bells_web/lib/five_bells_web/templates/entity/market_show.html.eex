@@ -56,3 +56,35 @@
     </div>
   </div>
 </div>
+
+<div class="row">
+  <div class="col">
+    <h2>Account History</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <td>bank_no</td>
+          <td>account_no</td>
+          <td>owner_type</td>
+          <td>owner_id</td>
+          <td>deposit</td>
+          <td>delta</td>
+          <td>cycle</td>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for deposit <- @deposits do %>
+        <tr>
+          <td><%= deposit.bank_no %></td>
+          <td><%= deposit.account_no %></td>
+          <td><%= deposit.owner_type %></td>
+          <td><%= deposit.owner_id %></td>
+          <td><%= deposit.deposit %></td>
+          <td><%= deposit.delta %></td>
+          <td><%= deposit.cycle %></td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

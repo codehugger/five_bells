@@ -5,6 +5,7 @@ defmodule FiveBellsWeb.EntityController do
 
   alias FiveBells.Statistics.TimeSeries
   alias FiveBells.Banks.Transaction
+  alias FiveBells.Banks.Deposit
 
   def show(conn, %{
         "simulation_id" => simulation_id,
@@ -27,6 +28,20 @@ defmodule FiveBellsWeb.EntityController do
       )
       |> Enum.group_by(fn s -> s.label end, fn s -> [s.cycle, s.value] end)
 
+    deposits =
+      case entity_type do
+        "Bank" ->
+          []
+
+        _ ->
+          FiveBells.Repo.all(
+            from(t in Deposit,
+              where: t.simulation_id == ^simulation_id and t.owner_id == ^entity_id,
+              order_by: [desc: t.cycle]
+            )
+          )
+      end
+
     transactions =
       case entity_type do
         "Bank" ->
@@ -42,6 +57,7 @@ defmodule FiveBellsWeb.EntityController do
       end
 
     render(conn, "show.html",
+      deposits: deposits,
       transactions: transactions,
       time_series: time_series,
       simulation_id: simulation_id,

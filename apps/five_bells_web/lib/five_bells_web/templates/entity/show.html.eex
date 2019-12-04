@@ -1,11 +1,11 @@
 <h1>Simulation - <%= @simulation_id %></h1>
 <%= if @entity_type == "Market" do %>
 <h2>Market - <%= @entity_id %></h2>
-<%= render "market_show.html", time_series: @time_series %>
+<%= render "market_show.html", time_series: @time_series, deposits: @deposits %>
 <% end %>
 <%= if @entity_type == "Factory" do %>
 <h2>Factory - <%= @entity_id %></h2>
-<%= render "factory_show.html", time_series: @time_series %>
+<%= render "factory_show.html", time_series: @time_series, deposits: @deposits %>
 <% end %>
 <%= if @entity_type == "Bank" do %>
 <h2>Bank - <%= @entity_id %></h2>

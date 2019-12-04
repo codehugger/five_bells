@@ -3,7 +3,7 @@ defmodule FiveBells.Repo.Migrations.CreateDeposits do
 
   def change do
     create table(:deposits) do
-      add(:bank, :string)
+      add(:bank_no, :string)
       add(:account_no, :string)
       add(:owner_type, :string)
       add(:owner_id, :string)

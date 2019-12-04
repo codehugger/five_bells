@@ -360,10 +360,10 @@ defmodule FiveBells.Agents.FactoryAgent do
     account = account(agent)
 
     case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
-           bank: BankAgent.state(bank(agent)).bank_no,
+           bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
            owner_type: "Factory",
-           owner_id: state(agent).name,
+           owner_id: state(agent).factory_no,
            deposit: account.deposit,
            delta: account.delta,
            cycle: cycle,
