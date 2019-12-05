@@ -14,7 +14,7 @@ defmodule FiveBells.Agents.MarketAgent do
       bid_price: 1,
       sell_price: 2,
       min_spread: 1,
-      max_spread: 5,
+      max_spread: 4,
       spread: 4,
       initial_deposit: 0,
       products_sold: 0,
@@ -57,8 +57,8 @@ defmodule FiveBells.Agents.MarketAgent do
     # adjust spread if necessary
     # record the state of inventory and prices
     # reset cycle data
-    with :ok <- adjust_prices(agent),
-         :ok <- adjust_spread(agent),
+    with :ok <- adjust_spread(agent),
+         :ok <- adjust_prices(agent),
          :ok <- purchase_inventory(agent),
          # :ok <- pay_salaries(agent, cycle, simulation_id),
          # :ok <- hire_fire_employees(agent, cycle, simulation_id),
@@ -352,8 +352,14 @@ defmodule FiveBells.Agents.MarketAgent do
       available_cash(agent) > deposit_buffer(agent) ->
         IO.puts("#{state(agent).name} raising prices")
 
+        bid_price = state(agent).bid_price + amount
+
+        # we maintain the spread but we make sure we always have profits
+        # ... this might be too much of an assumption to make
+        sell_price = max(bid_price * state(agent).spread, bid_price + 1)
+
         Agent.update(agent, fn x ->
-          %{x | bid_price: x.bid_price + amount, sell_price: x.sell_price + amount}
+          %{x | bid_price: bid_price, sell_price: sell_price}
         end)
 
       true ->
@@ -364,26 +370,28 @@ defmodule FiveBells.Agents.MarketAgent do
   defp lower_prices(agent, amount \\ 1) when amount >= 1 do
     IO.puts("#{state(agent).name} lowering prices")
 
+    bid_price = max(state(agent).bid_price - amount, 1)
+
+    # we maintain the spread but we make sure we always have profits
+    # ... this might be too much of an assumption to make
+    sell_price = max(bid_price * state(agent).spread, bid_price + 1)
+
     Agent.update(agent, fn x ->
-      %{
-        x
-        | bid_price: max(min(x.bid_price - amount, 1), 1),
-          sell_price: max(min(x.sell_price - amount, 1), 1)
-      }
+      %{x | bid_price: bid_price, sell_price: sell_price}
     end)
   end
 
   defp increase_spread(agent, amount) do
     Agent.update(agent, fn x ->
       spread = min(x.max_spread, x.spread + amount)
-      %{x | spread: spread, sell_price: x.bid_price * spread}
+      %{x | spread: spread}
     end)
   end
 
   defp decrease_spread(agent, amount) do
     Agent.update(agent, fn x ->
       spread = max(x.min_spread, x.spread - amount)
-      %{x | spread: spread, sell_price: x.bid_price * spread}
+      %{x | spread: spread}
     end)
   end
 
