@@ -122,6 +122,54 @@ defmodule FiveBells.Agents.MarketAgent do
     end
   end
 
+  defp sell_products(agent, customer, quantity) do
+    # the things to consider here are
+    # 1. do we have the given quantity in inventory
+    # 2. did the transfer from the customer go through?
+    # 3. were we able to hand over the requsted products?
+    case quantity_available?(agent, quantity) do
+      false ->
+        {:error, {:not_enough_stock, [available: inventory_count(agent), requested: quantity]}}
+
+      true ->
+        case BankAgent.transfer(
+               bank(agent),
+               customer,
+               agent,
+               quantity * sell_price(agent),
+               "Product purchase"
+             ) do
+          :ok ->
+            case remove_from_inventory(agent, quantity) do
+              {:ok, products} = result ->
+                Agent.update(agent, fn x ->
+                  %{
+                    x
+                    | products_sold: x.products_sold + length(products),
+                      products_sold_total: x.products_sold_total + length(products)
+                  }
+                end)
+
+                result
+
+              err ->
+                BankAgent.transfer(
+                  customer,
+                  bank(agent),
+                  agent,
+                  quantity * sell_price(agent),
+                  "Refund product purchase"
+                )
+
+                err
+            end
+
+          err ->
+            err
+        end
+    end
+  end
+
   #############################################################################
   # Purchase / Supplier
   #############################################################################
@@ -182,6 +230,13 @@ defmodule FiveBells.Agents.MarketAgent do
   # Inventory
   #############################################################################
 
+  def available_quantity?(agent, quantity) do
+    case inventory_count(agent) >= quantity do
+      true -> {:ok, inventory_count(agent)}
+      false -> {:error, :quantity_unavailable}
+    end
+  end
+
   def needs_to_restock?(agent) do
     # here we need to consider the following
     # 1. do we keep an inventory at all?
@@ -210,54 +265,6 @@ defmodule FiveBells.Agents.MarketAgent do
 
       true ->
         {:error, :no_bank_assigned}
-    end
-  end
-
-  defp sell_products(agent, customer, quantity) do
-    # the things to consider here are
-    # 1. do we have the given quantity in inventory
-    # 2. did the transfer from the customer go through?
-    # 3. were we able to hand over the requsted products?
-    case quantity_available?(agent, quantity) do
-      false ->
-        {:error, {:not_enough_stock, [available: inventory_count(agent), requested: quantity]}}
-
-      true ->
-        case BankAgent.transfer(
-               bank(agent),
-               customer,
-               agent,
-               quantity * sell_price(agent),
-               "Product purchase"
-             ) do
-          :ok ->
-            case remove_from_inventory(agent, quantity) do
-              {:ok, products} = result ->
-                Agent.update(agent, fn x ->
-                  %{
-                    x
-                    | products_sold: x.products_sold + length(products),
-                      products_sold_total: x.products_sold_total + length(products)
-                  }
-                end)
-
-                result
-
-              err ->
-                BankAgent.transfer(
-                  customer,
-                  bank(agent),
-                  agent,
-                  quantity * sell_price(agent),
-                  "Refund product purchase"
-                )
-
-                err
-            end
-
-          err ->
-            err
-        end
     end
   end
 

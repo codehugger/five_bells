@@ -80,7 +80,7 @@ defmodule FiveBells.Agents.BankAgent do
   def get_account_no(agent, owner) when is_pid(owner) do
     case account_registry(agent)[owner] do
       nil -> {:error, :unrecognized_owner}
-      account_no -> {:ok, account_no}
+      {account_no, _owner_type, _owner_id} -> {:ok, account_no}
     end
   end
 
@@ -128,7 +128,7 @@ defmodule FiveBells.Agents.BankAgent do
       nil ->
         {:error, :account_not_found}
 
-      owner_pid ->
+      {owner_pid, _owner_type, _owner_id} ->
         {:ok, Process.info(owner_pid)}
     end
   end
@@ -140,8 +140,7 @@ defmodule FiveBells.Agents.BankAgent do
         # Update bank after account is added
         Agent.update(agent, fn x -> %{x | bank: bank} end)
 
-        # Register account_no to pid of owner
-        register_account_ownership(agent, owner, account_no)
+        register_account_ownership(agent, owner, account_no, owner_type, owner_id)
 
         # Deposit cash if there is an initial deposit
         cond do
@@ -158,13 +157,14 @@ defmodule FiveBells.Agents.BankAgent do
     end
   end
 
-  defp register_account_ownership(agent, owner, account_no)
+  defp register_account_ownership(agent, owner, account_no, owner_type, owner_id)
        when is_pid(owner) and is_binary(account_no) do
     Agent.update(agent, fn x ->
       %{
         x
-        | account_registry: Map.put(x.account_registry, owner, account_no),
-          owner_registry: Map.put(x.owner_registry, account_no, owner)
+        | account_registry:
+            Map.put(x.account_registry, owner, {account_no, owner_type, owner_id}),
+          owner_registry: Map.put(x.owner_registry, account_no, {owner, owner_type, owner_id})
       }
     end)
   end
@@ -220,7 +220,7 @@ defmodule FiveBells.Agents.BankAgent do
   def deposit_cash(_agent, _owner, _amount, _text \\ "")
 
   def deposit_cash(agent, owner, amount, text) when is_pid(owner) and amount > 0 do
-    case get_account_no(agent, owner) do
+    case get_account(agent, owner) do
       {:ok, account_no} -> deposit_cash(agent, account_no, amount, text)
       err -> err
     end
@@ -246,7 +246,7 @@ defmodule FiveBells.Agents.BankAgent do
   end
 
   def transfer(agent, from_owner, to_no, amount, text)
-      when is_pid(from_owner) and is_binary(to_no) do
+      when is_pid(from_owner) and is_binary(to_no) and amount > 0 do
     case get_account_no(agent, from_owner) do
       {:ok, from_no} -> transfer(agent, from_no, to_no, amount, text)
       err -> err
@@ -254,7 +254,7 @@ defmodule FiveBells.Agents.BankAgent do
   end
 
   def transfer(agent, from_no, to_owner, amount, text)
-      when is_binary(from_no) and is_pid(to_owner) do
+      when is_binary(from_no) and is_pid(to_owner) and amount > 0 do
     case get_account_no(agent, to_owner) do
       {:ok, to_no} -> transfer(agent, from_no, to_no, amount, text)
       err -> err

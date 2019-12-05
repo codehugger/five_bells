@@ -29,7 +29,7 @@ defmodule FiveBellsWeb.BankController do
       FiveBells.Repo.all(
         from(t in Deposit,
           where: t.simulation_id == ^simulation_id and t.cycle == ^max_cycle,
-          order_by: t.account_no
+          order_by: [t.owner_type, t.owner_id]
         )
       )
 

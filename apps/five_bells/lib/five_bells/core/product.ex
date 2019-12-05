@@ -1,3 +1,3 @@
 defmodule Product do
-  defstruct name: "The Product", ttl: -1
+  defstruct name: "The Product"
 end
