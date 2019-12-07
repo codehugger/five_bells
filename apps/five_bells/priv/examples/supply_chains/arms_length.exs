@@ -31,7 +31,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     market_no: "M-GLASS",
     # suppliers: [glass_factory_1, glass_factory_2],
     initial_deposit: 100,
-    max_inventory: 30
+    max_inventory: 15
   )
 
 {:ok, glass_factory_1} =
@@ -39,8 +39,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     bank: bank,
     factory_no: "F-GLASS-1",
     initial_deposit: 100,
-    output: 5,
-    max_inventory: 20,
+    output: 10,
+    max_inventory: 30,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
@@ -51,8 +51,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     bank: bank,
     factory_no: "F-GLASS-2",
     initial_deposit: 100,
-    output: 5,
-    max_inventory: 20,
+    output: 10,
+    max_inventory: 30,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
