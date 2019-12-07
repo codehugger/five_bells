@@ -7,7 +7,7 @@ defmodule FiveBells.Agents.BorrowerAgent do
     defstruct [
       :bank,
       :account_no,
-      :person_no,
+      :entity_no,
       loan_amount: 0,
       loan_duration: 12,
       interest_rate: 0.0,
@@ -82,7 +82,7 @@ defmodule FiveBells.Agents.BorrowerAgent do
                bank(agent),
                agent,
                "Borrower",
-               state(agent).person_no,
+               state(agent).entity_no,
                initial_deposit(agent)
              ) do
           {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
@@ -110,7 +110,7 @@ defmodule FiveBells.Agents.BorrowerAgent do
            bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
            owner_type: "Borrower",
-           owner_id: state(agent).person_no,
+           owner_id: state(agent).entity_no,
            deposit: account.deposit,
            delta: account.delta,
            cycle: cycle,

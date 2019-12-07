@@ -28,19 +28,19 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, glass_market} =
   MarketAgent.start_link(
     bank: bank,
-    market_no: "M-GLASS",
+    entity_no: "M-GLASS",
     # suppliers: [glass_factory_1, glass_factory_2],
     initial_deposit: 100,
-    max_inventory: 15
+    max_inventory: 5
   )
 
 {:ok, glass_factory_1} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-GLASS-1",
+    entity_no: "F-GLASS-1",
     initial_deposit: 100,
-    output: 10,
-    max_inventory: 30,
+    output: 5,
+    max_inventory: 5,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
@@ -49,10 +49,10 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, glass_factory_2} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-GLASS-2",
+    entity_no: "F-GLASS-2",
     initial_deposit: 100,
-    output: 10,
-    max_inventory: 30,
+    output: 5,
+    max_inventory: 5,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
@@ -64,20 +64,20 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 
 {:ok, metal_market} =
   MarketAgent.start_link(
-    market_no: "M-METAL",
+    entity_no: "M-METAL",
     bank: bank,
     # suppliers: [metal_factory_1, metal_factory_2],
     initial_deposit: 100,
-    max_inventory: 30
+    max_inventory: 5
   )
 
 {:ok, metal_factory_1} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-METAL-1",
+    entity_no: "F-METAL-1",
     initial_deposit: 100,
     output: 5,
-    max_inventory: 20,
+    max_inventory: 5,
     market: metal_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "METAL"}
@@ -86,10 +86,10 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, metal_factory_2} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-METAL-2",
+    entity_no: "F-METAL-2",
     initial_deposit: 100,
     output: 5,
-    max_inventory: 20,
+    max_inventory: 5,
     market: metal_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "METAL"}
@@ -102,7 +102,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, end_product_market} =
   MarketAgent.start_link(
     bank: bank,
-    market_no: "M-ELECTRONIC",
+    entity_no: "M-ELECTRONIC",
     # supplier: end_product_factory,
     initial_deposit: 1000,
     max_inventory: 5,
@@ -116,7 +116,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, end_product_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-ELECTRONIC",
+    entity_no: "F-ELECTRONIC",
     initial_deposit: 1000,
     output: 5,
     max_inventory: 5,
@@ -135,10 +135,10 @@ customers =
     {:ok, customer} =
       PersonAgent.start_link(
         name: "Customer",
-        person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
+        entity_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: end_product_market,
-        initial_deposit: 200
+        initial_deposit: 50
       )
 
     customer
@@ -171,16 +171,6 @@ cycles = 30
 
 Enum.each(1..cycles, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
-    # customers start each round by going to the store/retailer
-    customers
-    |> Enum.shuffle()
-    |> Enum.each(fn person ->
-      case PersonAgent.evaluate(person, cycle, simulation_id) do
-        {:error, _} -> false
-        _ -> true
-      end
-    end)
-
     # market and factory communication happens at the end of the day (restocking)
     factories
     |> Enum.shuffle()
@@ -195,6 +185,16 @@ Enum.each(1..cycles, fn _ ->
     |> Enum.shuffle()
     |> Enum.each(fn market ->
       case(MarketAgent.evaluate(market, cycle, simulation_id)) do
+        {:error, _} -> false
+        _ -> true
+      end
+    end)
+
+    # customers start each round by going to the store/retailer
+    customers
+    |> Enum.shuffle()
+    |> Enum.each(fn person ->
+      case PersonAgent.evaluate(person, cycle, simulation_id) do
         {:error, _} -> false
         _ -> true
       end

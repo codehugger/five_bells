@@ -55,11 +55,7 @@
     <table class="table table-striped table-sm">
     <thead>
       <td>deb_no</td>
-      <td>deb_owner_type</td>
-      <td>deb_owner_id</td>
       <td>cred_no</td>
-      <td>cred_owner_type</td>
-      <td>cred_owner_id</td>
       <td>amount</td>
       <td>text</td>
       <td>cycle</td>
@@ -69,11 +65,7 @@
       <%= for trans <- @transactions do %>
       <tr>
       <td><%= trans.deb_no %></td>
-      <td><%= trans.deb_owner_type %></td>
-      <td><%= trans.deb_owner_id %></td>
       <td><%= trans.cred_no %></td>
-      <td><%= trans.cred_owner_type %></td>
-      <td><%= trans.cred_owner_id %></td>
       <td><%= trans.amount %></td>
       <td><%= trans.text %></td>
       <td><%= trans.cycle %></td>

@@ -25,7 +25,7 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 
 {:ok, borrower1} =
   BorrowerAgent.start_link(
-    person_no: "R-0001",
+    entity_no: "R-0001",
     bank: bank,
     loan_amount: 1200,
     interest_rate: 10.0,
@@ -34,7 +34,7 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 
 # {:ok, borrower2} =
 #   BorrowerAgent.start_link(
-#     person_no: "R-0002",
+#     entity_no: "R-0002",
 #     bank: bank,
 #     loan_amount: 1200,
 #     interest_rate: 10.0,
@@ -43,7 +43,7 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 
 # {:ok, borrower3} =
 #   BorrowerAgent.start_link(
-#     person_no: "R-0003",
+#     entity_no: "R-0003",
 #     bank: bank,
 #     loan_amount: 1200,
 #     interest_rate: 10.0,
@@ -52,7 +52,7 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 
 # {:ok, borrower4} =
 #   BorrowerAgent.start_link(
-#     person_no: "R-0004",
+#     entity_no: "R-0004",
 #     bank: bank,
 #     loan_amount: 1200,
 #     interest_rate: 10.0,
@@ -61,7 +61,7 @@ alias FiveBells.Agents.{SimulationAgent, BorrowerAgent, BankAgent}
 
 # {:ok, borrower5} =
 #   BorrowerAgent.start_link(
-#     person_no: "R-0005",
+#     entity_no: "R-0005",
 #     bank: bank,
 #     loan_amount: 1200,
 #     interest_rate: 10.0,

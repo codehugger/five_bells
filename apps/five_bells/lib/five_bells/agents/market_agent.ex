@@ -10,7 +10,7 @@ defmodule FiveBells.Agents.MarketAgent do
       :account_no,
       supplier: nil,
       name: "Market",
-      market_no: "M-0001",
+      entity_no: "M-0001",
       bid_price: 1,
       sell_price: 2,
       min_spread: 1,
@@ -195,8 +195,11 @@ defmodule FiveBells.Agents.MarketAgent do
         IO.puts("#{state(agent).name} purchasing inventory")
 
         case supplier(agent) do
-          nil -> {:error, :no_supplier}
-          supplier -> FactoryAgent.sell_to_customer(supplier, agent, quantity)
+          nil ->
+            {:error, :no_supplier}
+
+          supplier ->
+            FactoryAgent.sell_to_market(supplier, agent, quantity, state(agent).bid_price)
         end
 
       false ->
@@ -217,13 +220,14 @@ defmodule FiveBells.Agents.MarketAgent do
     # here there are two main things to consider
     # 1. how many do we want and have storage for?
     # 2. how many can we afford?
-    case inventory_count(agent) < max_inventory(agent) do
-      true ->
-        min(max_items(agent), round(available_cash(agent) / bid_price(agent)))
+    IO.puts("########################################################################")
+    IO.inspect(state(agent).entity_no)
+    IO.inspect(max_items(agent))
+    IO.inspect(round(available_cash(agent) / bid_price(agent)))
+    IO.inspect(min(max_items(agent), round(available_cash(agent) / bid_price(agent))))
+    IO.puts("########################################################################")
 
-      false ->
-        0
-    end
+    min(max_items(agent), round(available_cash(agent) / bid_price(agent)))
   end
 
   #############################################################################
@@ -256,7 +260,7 @@ defmodule FiveBells.Agents.MarketAgent do
                bank(agent),
                agent,
                "Market",
-               state(agent).market_no,
+               state(agent).entity_no,
                initial_deposit(agent)
              ) do
           {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
@@ -537,7 +541,7 @@ defmodule FiveBells.Agents.MarketAgent do
            bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
            owner_type: "Market",
-           owner_id: state(agent).market_no,
+           owner_id: state(agent).entity_no,
            deposit: account.deposit,
            delta: account.delta,
            cycle: cycle,
@@ -553,9 +557,9 @@ defmodule FiveBells.Agents.MarketAgent do
 
     %FiveBells.Statistics.TimeSeries{
       entity_type: "Market",
-      entity_id: "#{market.market_no}",
+      entity_id: "#{market.entity_no}",
       label: label,
-      key: "#{market.market_no}",
+      key: "#{market.entity_no}",
       value: value,
       cycle: cycle,
       simulation_id: simulation_id

@@ -25,85 +25,31 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
 # Competing Component Factories selling -> Glass through Market 1
 ###############################################################################
 
-{:ok, glass_market} =
-  MarketAgent.start_link(
-    bank: bank,
-    market_no: "M-GLASS",
-    # suppliers: [glass_factory_1, glass_factory_2],
-    initial_deposit: 100,
-    max_inventory: 15,
-    min_spread: 1,
-    max_spread: 1,
-    spread: 1,
-    bid_price: 5,
-    sell_price: 10
-  )
-
-{:ok, glass_factory_1} =
+{:ok, glass_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-GLASS-1",
+    entity_no: "F-GLASS",
     initial_deposit: 100,
-    output: 15,
-    max_inventory: 30,
-    market: glass_market,
-    initiate_sale: true,
+    output: 5,
+    max_inventory: 20,
+    initiate_sale: false,
     recipe: %Recipe{components: [], product_name: "GLASS"}
   )
-
-# {:ok, glass_factory_2} =
-#   FactoryAgent.start_link(
-#     bank: bank,
-#     factory_no: "F-GLASS-2",
-#     initial_deposit: 100,
-#     output: 10,
-#     max_inventory: 30,
-#     market: glass_market,
-#     initiate_sale: true,
-#     recipe: %Recipe{components: [], product_name: "GLASS"}
-#   )
 
 ###############################################################################
 # Competing Component Factories selling -> Steel through Market 1
 ###############################################################################
 
-{:ok, metal_market} =
-  MarketAgent.start_link(
-    market_no: "M-METAL",
-    bank: bank,
-    # suppliers: [metal_factory_1, metal_factory_2],
-    initial_deposit: 100,
-    max_inventory: 15,
-    min_spread: 1,
-    max_spread: 1,
-    spread: 1,
-    bid_price: 5,
-    sell_price: 10
-  )
-
-{:ok, metal_factory_1} =
+{:ok, metal_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-METAL-1",
+    entity_no: "F-METAL",
     initial_deposit: 100,
-    output: 15,
-    max_inventory: 15,
-    market: metal_market,
-    initiate_sale: true,
+    output: 5,
+    max_inventory: 20,
+    initiate_sale: false,
     recipe: %Recipe{components: [], product_name: "METAL"}
   )
-
-# {:ok, metal_factory_2} =
-#   FactoryAgent.start_link(
-#     bank: bank,
-#     factory_no: "F-METAL-2",
-#     initial_deposit: 100,
-#     output: 5,
-#     max_inventory: 20,
-#     market: metal_market,
-#     initiate_sale: true,
-#     recipe: %Recipe{components: [], product_name: "METAL"}
-#   )
 
 ###############################################################################
 # End-product assembler factory
@@ -112,12 +58,11 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
 {:ok, end_product_market} =
   MarketAgent.start_link(
     bank: bank,
-    market_no: "M-ELECTRONIC",
-    # supplier: end_product_factory,
+    entity_no: "M-ELECTRONIC",
     initial_deposit: 1000,
-    max_inventory: 15,
-    min_spread: 1,
-    max_spread: 5,
+    max_inventory: 5,
+    min_spread: 2,
+    max_spread: 3,
     spread: 2,
     bid_price: 5,
     sell_price: 10
@@ -126,14 +71,15 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
 {:ok, end_product_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-ELECTRONIC",
+    entity_no: "F-ELECTRONIC",
     initial_deposit: 1000,
-    output: 15,
-    max_inventory: 15,
+    output: 5,
+    max_inventory: 5,
     initiate_sale: true,
     recipe: %Recipe{components: ["GLASS", "METAL"], product_name: "ELECTRONIC"},
-    suppliers: %{"GLASS" => glass_market, "METAL" => metal_market},
-    market: end_product_market
+    suppliers: %{"GLASS" => glass_factory, "METAL" => metal_factory},
+    market: end_product_market,
+    supplier_type: :factory
   )
 
 ###############################################################################
@@ -145,7 +91,7 @@ customers =
     {:ok, customer} =
       PersonAgent.start_link(
         name: "Customer",
-        person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
+        entity_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: end_product_market,
         initial_deposit: 200
@@ -161,14 +107,12 @@ customers =
 {:ok, simulation} = SimulationAgent.start_link(simulation_id: "keiretsu")
 
 factories = [
-  glass_factory_1,
-  # glass_factory_2,
-  metal_factory_1,
-  # metal_factory_2,
+  glass_factory,
+  metal_factory,
   end_product_factory
 ]
 
-markets = [metal_market, glass_market, end_product_market]
+markets = [end_product_market]
 
 ###############################################################################
 # Evaluate

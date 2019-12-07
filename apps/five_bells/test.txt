@@ -70,7 +70,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -156,7 +156,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -243,7 +243,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -310,7 +310,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -356,7 +356,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -434,7 +434,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -512,7 +512,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -577,7 +577,7 @@ Market receiving inventory of size 18
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -633,7 +633,7 @@ Market receiving inventory of size 9
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -679,7 +679,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -751,7 +751,7 @@ Market receiving inventory of size 20
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -805,7 +805,7 @@ Market receiving inventory of size 7
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -851,7 +851,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -914,7 +914,7 @@ Market receiving inventory of size 16
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -960,7 +960,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1006,7 +1006,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1052,7 +1052,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1098,7 +1098,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1144,7 +1144,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1190,7 +1190,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1236,7 +1236,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1282,7 +1282,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1328,7 +1328,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1374,7 +1374,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1420,7 +1420,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1466,7 +1466,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1512,7 +1512,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1558,7 +1558,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1604,7 +1604,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,
@@ -1650,7 +1650,7 @@ Market adjusting spread
     %Product{name: "Recipe Product", ttl: -1},
     %Product{name: "Recipe Product", ttl: -1}
   ],
-  market_no: "M-0001",
+  entity_no: "M-0001",
   max_inventory: 20,
   max_spread: 5,
   min_spread: 1,

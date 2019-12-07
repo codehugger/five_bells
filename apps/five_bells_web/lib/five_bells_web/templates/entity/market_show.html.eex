@@ -55,6 +55,14 @@
       </div>
     </div>
   </div>
+  <div class="p-3 col-6">
+    <div class="card">
+      <div class="card-header">market.inventory_count</div>
+      <div class="card-body">
+        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.inventory_count"]) %>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="row">

@@ -2,6 +2,7 @@ defmodule FiveBells.Agents.FactoryAgent do
   use Agent
   require Logger
 
+  alias __MODULE__
   alias FiveBells.Agents.{BankAgent, MarketAgent}
 
   defmodule State do
@@ -15,7 +16,7 @@ defmodule FiveBells.Agents.FactoryAgent do
       units_produced_total: 0,
       current_cycle: 0,
       name: "Factory",
-      factory_no: "F-0001",
+      entity_no: "F-0001",
       recipe: %Recipe{},
       initial_deposit: 0,
       max_inventory: -1,
@@ -23,7 +24,8 @@ defmodule FiveBells.Agents.FactoryAgent do
       inventory: [],
       unit_cost: 1,
       market: nil,
-      suppliers: %{}
+      suppliers: %{},
+      supplier_type: :market
     ]
   end
 
@@ -98,7 +100,7 @@ defmodule FiveBells.Agents.FactoryAgent do
                bank(agent),
                agent,
                "Factory",
-               state(agent).factory_no,
+               state(agent).entity_no,
                initial_deposit(agent)
              ) do
           {:ok, account_no} -> Agent.update(agent, fn x -> %{x | account_no: account_no} end)
@@ -116,6 +118,10 @@ defmodule FiveBells.Agents.FactoryAgent do
 
   def product_name(agent), do: recipe(agent).product_name
   defp recipe(agent), do: state(agent).recipe
+
+  def available_quantity?(agent, quantity) do
+    output_remaining(agent) >= quantity
+  end
 
   defp can_output?(agent) do
     output_remaining(agent) > 0 && max_items(agent) > 0 && production_capacity(agent) > 0
@@ -142,18 +148,40 @@ defmodule FiveBells.Agents.FactoryAgent do
     )
   end
 
-  def produce(agent) do
+  def produce(agent), do: produce_capacity(agent)
+  def produce(agent, quantity), do: produce_quantity(agent, quantity)
+
+  def produce_quantity(agent, quantity) do
+    case output_remaining(agent) >= quantity do
+      true ->
+        # Go to our suppliers and get the necessary components
+        case acquire_components(agent, state(agent).recipe.components, quantity) do
+          {:ok, _components} ->
+            produced = Enum.map(1..quantity, fn _ -> Recipe.produce(state(agent).recipe) end)
+
+            Agent.update(agent, fn x ->
+              %{
+                x
+                | units_produced_total: x.units_produced_total + length(produced),
+                  units_produced: x.units_produced + length(produced),
+                  inventory: x.inventory ++ produced
+              }
+            end)
+
+          err ->
+            err
+        end
+
+      false ->
+        {:error, {:unable_to_produce_quantity, quantity, output_remaining(agent)}}
+    end
+  end
+
+  def produce_capacity(agent) do
     case can_output?(agent) do
       true ->
         # How much can we actually produce?
         quantity = production_capacity(agent)
-
-        if quantity == 0 do
-          IO.puts("Quantity being produced #{quantity}")
-          IO.puts("Max items is #{max_items(agent)}")
-          IO.puts("Output remaining is #{output_remaining(agent)}")
-          IO.puts("Afford output is #{afford_output(agent)}")
-        end
 
         # Go to our suppliers and get the necessary components
         case acquire_components(agent, state(agent).recipe.components, quantity) do
@@ -179,25 +207,38 @@ defmodule FiveBells.Agents.FactoryAgent do
   end
 
   def acquire_components(agent, names, quantity \\ 1, purchased \\ %{}) do
-    with :ok <- check_component_availability(agent, names, quantity),
-         {:ok, _} = resp <- purchase_components(agent, names, quantity, purchased) do
-      resp
-    else
-      err -> err
+    case state(agent).supplier_type do
+      :market ->
+        with :ok <- check_market_availability(agent, names, quantity),
+             {:ok, _} = resp <- purchase_market_components(agent, names, quantity, purchased) do
+          resp
+        else
+          err -> err
+        end
+
+      :factory ->
+        with :ok <- check_factory_availability(agent, names, quantity),
+             {:ok, _} = resp <- purchase_factory_components(agent, names, quantity, purchased) do
+          resp
+        else
+          err -> err
+        end
     end
   end
 
-  def check_component_availability(_agent, _names, _quantity \\ 1)
-  def check_component_availability(_agent, [], _quantity), do: :ok
+  # market purchase
 
-  def check_component_availability(agent, [name | tail], quantity) do
+  def check_market_availability(_agent, _names, _quantity \\ 1)
+  def check_market_availability(_agent, [], _quantity), do: :ok
+
+  def check_market_availability(agent, [name | tail], quantity) do
     case state(agent).suppliers[name] do
       nil ->
         {:error, {:no_supplier_for_component, name}}
 
       supplier ->
         with {:ok, _available} <- MarketAgent.available_quantity?(supplier, quantity),
-             :ok <- check_component_availability(agent, tail, quantity) do
+             :ok <- check_market_availability(agent, tail, quantity) do
           :ok
         else
           err -> err
@@ -205,10 +246,10 @@ defmodule FiveBells.Agents.FactoryAgent do
     end
   end
 
-  def purchase_components(_agent, _names, _quantity \\ 1, _purchased \\ %{})
-  def purchase_components(_agent, [], _quantity, purchased), do: {:ok, purchased}
+  def purchase_market_components(_agent, _names, _quantity \\ 1, _purchased \\ %{})
+  def purchase_market_components(_agent, [], _quantity, purchased), do: {:ok, purchased}
 
-  def purchase_components(agent, [name | tail], quantity, purchased) do
+  def purchase_market_components(agent, [name | tail], quantity, purchased) do
     case state(agent).suppliers[name] do
       nil ->
         {:error, {:no_supplier_for_component, name}}
@@ -216,7 +257,56 @@ defmodule FiveBells.Agents.FactoryAgent do
       supplier ->
         case MarketAgent.sell_to_customer(supplier, agent, quantity) do
           {:ok, products} ->
-            purchase_components(agent, tail, quantity, Map.put_new(purchased, name, products))
+            purchase_market_components(
+              agent,
+              tail,
+              quantity,
+              Map.put_new(purchased, name, products)
+            )
+
+          err ->
+            err
+        end
+    end
+  end
+
+  # factory purchase
+
+  def check_factory_availability(_agent, _names, _quantity \\ 1)
+  def check_factory_availability(_agent, [], _quantity), do: :ok
+
+  def check_factory_availability(agent, [name | tail], quantity) do
+    case state(agent).suppliers[name] do
+      nil ->
+        {:error, {:no_supplier_for_component, name}}
+
+      supplier ->
+        with true <- FactoryAgent.available_quantity?(supplier, quantity),
+             :ok <- check_factory_availability(agent, tail, quantity) do
+          :ok
+        else
+          err -> err
+        end
+    end
+  end
+
+  def purchase_factory_components(_agent, _names, _quantity \\ 1, _purchased \\ %{})
+  def purchase_factory_components(_agent, [], _quantity, purchased), do: {:ok, purchased}
+
+  def purchase_factory_components(agent, [name | tail], quantity, purchased) do
+    case state(agent).suppliers[name] do
+      nil ->
+        {:error, {:no_supplier_for_component, name}}
+
+      supplier ->
+        case FactoryAgent.sell_to_factory(supplier, agent, quantity) do
+          {:ok, products} ->
+            purchase_market_components(
+              agent,
+              tail,
+              quantity,
+              Map.put_new(purchased, name, products)
+            )
 
           err ->
             err
@@ -250,10 +340,11 @@ defmodule FiveBells.Agents.FactoryAgent do
   defp units_sold(agent), do: state(agent).units_sold
   defp units_sold_total(agent), do: state(agent).units_sold_total
 
+  # market sales
+
   def set_market(agent, market), do: Agent.update(agent, fn x -> %{x | market: market} end)
 
-  def sell_to_customer(agent, buyer, quantity \\ 1, price \\ 1)
-      when is_pid(buyer) and price > 0 and quantity > 0 do
+  def sell_to_market(agent, buyer, quantity, price) when price > 0 and quantity > 0 do
     case inventory_count(agent) >= quantity do
       true ->
         with :ok <-
@@ -262,7 +353,9 @@ defmodule FiveBells.Agents.FactoryAgent do
                  buyer,
                  agent,
                  price * quantity,
-                 "Selling to customer"
+                 "#{FactoryAgent.state(agent).entity_no} selling #{quantity} units to #{
+                   MarketAgent.state(buyer).entity_no
+                 }"
                ),
              {:ok, products} <- remove_from_inventory(agent, quantity),
              :ok <- MarketAgent.receive_delivery(buyer, products) do
@@ -292,21 +385,53 @@ defmodule FiveBells.Agents.FactoryAgent do
   end
 
   def sell_to_market(agent) do
-    # sell as much as the market is willing to accept and we can provide
-    # price is decided by market through bid price
-    capacity = min(MarketAgent.purchase_capacity(market(agent)), inventory_count(agent))
-
-    case initiates_sale?(agent) && capacity > 0 do
+    case initiates_sale?(agent) do
       true ->
-        sell_to_customer(
-          agent,
-          market(agent),
-          capacity,
-          MarketAgent.bid_price(market(agent))
-        )
+        buyer = market(agent)
+        price = MarketAgent.bid_price(market(agent))
+        quantity = min(MarketAgent.purchase_capacity(market(agent)), inventory_count(agent))
+
+        # we are only interested in selling to markets that are willing to pay and can receive something
+        cond do
+          quantity > 0 && price > 0 ->
+            sell_to_market(agent, buyer, quantity, price)
+
+          true ->
+            :ok
+        end
 
       false ->
         :ok
+    end
+  end
+
+  # factory sales
+
+  def sell_to_factory(agent, buyer, quantity \\ 1, price \\ 1)
+      when is_pid(buyer) and price > 0 and quantity > 0 do
+    # Factory sales are paid in advance to ensure there are funds for the purchase
+    # of the required components
+    with :ok <-
+           BankAgent.transfer(
+             bank(agent),
+             buyer,
+             agent,
+             price * quantity,
+             "#{FactoryAgent.state(agent).entity_no} selling #{quantity} units to #{
+               FactoryAgent.state(buyer).entity_no
+             }"
+           ),
+         :ok <- produce_quantity(agent, quantity),
+         {:ok, _products} <- remove_from_inventory(agent, quantity) do
+      Agent.update(agent, fn x ->
+        %{
+          x
+          | units_sold: x.units_sold + quantity,
+            units_sold_total: x.units_sold_total + quantity
+        }
+      end)
+    else
+      err -> err
     end
   end
 
@@ -435,7 +560,7 @@ defmodule FiveBells.Agents.FactoryAgent do
            bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
            owner_type: "Factory",
-           owner_id: state(agent).factory_no,
+           owner_id: state(agent).entity_no,
            deposit: account.deposit,
            delta: account.delta,
            cycle: cycle,
@@ -451,7 +576,7 @@ defmodule FiveBells.Agents.FactoryAgent do
       label: label,
       key: key,
       entity_type: "Factory",
-      entity_id: state(agent).factory_no,
+      entity_id: state(agent).entity_no,
       value: value,
       cycle: cycle,
       simulation_id: simulation_id

@@ -26,7 +26,7 @@ people =
     {:ok, person} =
       PersonAgent.start_link(
         name: "Person#{x}",
-        person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
+        entity_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: market,
         initial_deposit: 20
