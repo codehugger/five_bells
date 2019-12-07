@@ -106,8 +106,6 @@ defmodule FiveBells.Agents.BorrowerAgent do
   def flush_account_status(agent, cycle, simulation_id) do
     account = account(agent)
 
-    IO.inspect(account)
-
     case FiveBells.Repo.insert(%FiveBells.Banks.Deposit{
            bank_no: BankAgent.state(bank(agent)).bank_no,
            account_no: account.account_no,
