@@ -102,7 +102,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, end_product_market} =
   MarketAgent.start_link(
     bank: bank,
-    market_no: "M-END",
+    market_no: "M-ELECTRONIC",
     # supplier: end_product_factory,
     initial_deposit: 1000,
     max_inventory: 5,
@@ -116,7 +116,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 {:ok, end_product_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-END-1",
+    factory_no: "F-ELECTRONIC",
     initial_deposit: 1000,
     output: 5,
     max_inventory: 5,
@@ -164,7 +164,7 @@ markets = [metal_market, glass_market, end_product_market]
 # Evaluate
 ###############################################################################
 
-cycles = 100
+cycles = 30
 
 # IO.inspect(:sys.get_state(end_product_factory))
 # IO.inspect(:sys.get_state(end_product_market))
