@@ -29,8 +29,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
   MarketAgent.start_link(
     bank: bank,
     market_no: "M-GLASS",
-    # suppliers: [glass_factory_1, glass_factory_2],
-    initial_deposit: 100,
+    initial_deposit: 1000,
     max_inventory: 15
   )
 
@@ -40,7 +39,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     factory_no: "F-GLASS-1",
     initial_deposit: 100,
     output: 10,
-    max_inventory: 30,
+    max_inventory: 20,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
@@ -52,7 +51,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     factory_no: "F-GLASS-2",
     initial_deposit: 100,
     output: 10,
-    max_inventory: 30,
+    max_inventory: 20,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
@@ -66,9 +65,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
   MarketAgent.start_link(
     market_no: "M-METAL",
     bank: bank,
-    # suppliers: [metal_factory_1, metal_factory_2],
-    initial_deposit: 100,
-    max_inventory: 30
+    initial_deposit: 1000,
+    max_inventory: 15
   )
 
 {:ok, metal_factory_1} =
@@ -76,7 +74,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     bank: bank,
     factory_no: "F-METAL-1",
     initial_deposit: 100,
-    output: 5,
+    output: 10,
     max_inventory: 20,
     market: metal_market,
     initiate_sale: true,
@@ -88,7 +86,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     bank: bank,
     factory_no: "F-METAL-2",
     initial_deposit: 100,
-    output: 5,
+    output: 10,
     max_inventory: 20,
     market: metal_market,
     initiate_sale: true,
@@ -103,14 +101,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
   MarketAgent.start_link(
     bank: bank,
     market_no: "M-ELECTRONIC",
-    # supplier: end_product_factory,
     initial_deposit: 1000,
-    max_inventory: 5,
-    min_spread: 2,
-    max_spread: 3,
-    spread: 2,
-    bid_price: 5,
-    sell_price: 10
+    max_inventory: 15
   )
 
 {:ok, end_product_factory} =
@@ -118,8 +110,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
     bank: bank,
     factory_no: "F-ELECTRONIC",
     initial_deposit: 1000,
-    output: 5,
-    max_inventory: 5,
+    output: 15,
+    max_inventory: 15,
     initiate_sale: true,
     recipe: %Recipe{components: ["GLASS", "METAL"], product_name: "ELECTRONIC"},
     suppliers: %{"GLASS" => glass_market, "METAL" => metal_market},
@@ -138,7 +130,7 @@ customers =
         person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: end_product_market,
-        initial_deposit: 200
+        initial_deposit: 100
       )
 
     customer
@@ -171,7 +163,9 @@ cycles = 30
 
 Enum.each(1..cycles, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
-    # customers start each round by going to the store/retailer
+    ###########################################################################
+    # customers
+    ###########################################################################
     customers
     |> Enum.shuffle()
     |> Enum.each(fn person ->
@@ -181,7 +175,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # market and factory communication happens at the end of the day (restocking)
+    ###########################################################################
+    # factories
+    ###########################################################################
     factories
     |> Enum.shuffle()
     |> Enum.each(fn factory ->
@@ -191,6 +187,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
+    ###########################################################################
+    # markets
+    ###########################################################################
     markets
     |> Enum.shuffle()
     |> Enum.each(fn market ->
@@ -200,7 +199,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # bank audit happens at the very end
+    ###########################################################################
+    # banks
+    ###########################################################################
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)
 end)

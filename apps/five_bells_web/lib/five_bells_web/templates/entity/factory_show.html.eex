@@ -1,87 +1,192 @@
+<% units_sold_values = Enum.map(@time_series["factory.units_sold"], fn [x,y|_] -> y end) %>
+<% inventory_count_values = Enum.map(@time_series["factory.inventory_count"], fn [x,y|_] -> y end) %>
+<% units_produced_values = Enum.map(@time_series["factory.units_produced"], fn [x,y|_] -> y end) %>
+<% output_remaining_values = Enum.map(@time_series["factory.output_remaining"], fn [x,y|_] -> y end) %>
+
 <div class="row">
-  <div class="col">
-    <h2>Statistics</h2>
+  <div class="col-2">
     <div class="row">
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.units_sold</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold"]) %>
-          </div>
-        </div>
+      <div class="col">
+        <h2>Key Figures</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <td>Key</td>
+              <td>Value</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>total units_produced</strong></td>
+              <td><%= Jason.encode!(Enum.sum(units_produced_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>min units_produced</strong></td>
+              <td><%= Jason.encode!(Enum.min(units_produced_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max units_produced</strong></td>
+              <td><%= Jason.encode!(Enum.max(units_produced_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg units_produced</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(units_produced_values) / length(units_produced_values))) %></td>
+            </tr>
+
+            <tr style="background: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>total units_sold</strong></td>
+              <td><%= Jason.encode!(Enum.sum(units_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>min units_sold</strong></td>
+              <td><%= Jason.encode!(Enum.min(units_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max units_sold</strong></td>
+              <td><%= Jason.encode!(Enum.max(units_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg units_sold</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(units_sold_values) / length(units_sold_values))) %></td>
+            </tr>
+
+            <tr style="background: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>total inventory_count</strong></td>
+              <td><%= Jason.encode!(Enum.sum(inventory_count_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>min inventory_count</strong></td>
+              <td><%= Jason.encode!(Enum.min(inventory_count_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max inventory_count</strong></td>
+              <td><%= Jason.encode!(Enum.max(inventory_count_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg inventory_count</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(inventory_count_values) / length(inventory_count_values))) %></td>
+            </tr>
+
+            <tr style="background: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>min output_remaining</strong></td>
+              <td><%= Jason.encode!(Enum.min(output_remaining_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max output_remaining</strong></td>
+              <td><%= Jason.encode!(Enum.max(output_remaining_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg output_remaining</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(output_remaining_values) / length(output_remaining_values))) %></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.units_sold_total</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold_total"]) %>
-          </div>
-        </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="row">
+      <div class="col">
+        <h2>Account History</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <td>bank_no</td>
+              <td>account_no</td>
+              <td>owner_type</td>
+              <td>owner_id</td>
+              <td>deposit</td>
+              <td>delta</td>
+              <td>cycle</td>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for deposit <- @deposits do %>
+            <tr>
+              <td><%= deposit.bank_no %></td>
+              <td><%= deposit.account_no %></td>
+              <td><%= deposit.owner_type %></td>
+              <td><%= deposit.owner_id %></td>
+              <td><%= deposit.deposit %></td>
+              <td><%= deposit.delta %></td>
+              <td><%= deposit.cycle %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.inventory_count</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.inventory_count"]) %>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="row">
+      <div class="col">
+        <h2>Statistics</h2>
+        <div class="row">
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.units_sold</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold"]) %>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.units_produced</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced"]) %>
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.units_sold_total</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold_total"]) %>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.units_produced_total</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced_total"]) %>
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.inventory_count</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.inventory_count"]) %>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="p-3 col-6">
-        <div class="card">
-          <div class="card-header">factory.output_remaining</div>
-          <div class="card-body">
-            <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.output_remaining"]) %>
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.units_produced</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced"]) %>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.units_produced_total</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced_total"]) %>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 col-6">
+            <div class="card">
+              <div class="card-header">factory.output_remaining</div>
+              <div class="card-body">
+                <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.output_remaining"]) %>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col">
-    <h2>Account History</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <td>bank_no</td>
-          <td>account_no</td>
-          <td>owner_type</td>
-          <td>owner_id</td>
-          <td>deposit</td>
-          <td>delta</td>
-          <td>cycle</td>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for deposit <- @deposits do %>
-        <tr>
-          <td><%= deposit.bank_no %></td>
-          <td><%= deposit.account_no %></td>
-          <td><%= deposit.owner_type %></td>
-          <td><%= deposit.owner_id %></td>
-          <td><%= deposit.deposit %></td>
-          <td><%= deposit.delta %></td>
-          <td><%= deposit.cycle %></td>
-        </tr>
-        <% end %>
-      </tbody>
-    </table>
   </div>
 </div>

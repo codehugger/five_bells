@@ -29,39 +29,26 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
   MarketAgent.start_link(
     bank: bank,
     market_no: "M-GLASS",
-    # suppliers: [glass_factory_1, glass_factory_2],
-    initial_deposit: 100,
+    initial_deposit: 1000,
     max_inventory: 15,
-    min_spread: 1,
-    max_spread: 1,
-    spread: 1,
-    bid_price: 5,
-    sell_price: 10
+    min_spread: 0,
+    max_spread: 0,
+    spread: 0,
+    bid_price: 1,
+    sell_price: 1
   )
 
-{:ok, glass_factory_1} =
+{:ok, glass_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-GLASS-1",
+    factory_no: "F-GLASS",
     initial_deposit: 100,
     output: 15,
-    max_inventory: 30,
+    max_inventory: 15,
     market: glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "GLASS"}
   )
-
-# {:ok, glass_factory_2} =
-#   FactoryAgent.start_link(
-#     bank: bank,
-#     factory_no: "F-GLASS-2",
-#     initial_deposit: 100,
-#     output: 10,
-#     max_inventory: 30,
-#     market: glass_market,
-#     initiate_sale: true,
-#     recipe: %Recipe{components: [], product_name: "GLASS"}
-#   )
 
 ###############################################################################
 # Competing Component Factories selling -> Steel through Market 1
@@ -71,20 +58,19 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
   MarketAgent.start_link(
     market_no: "M-METAL",
     bank: bank,
-    # suppliers: [metal_factory_1, metal_factory_2],
-    initial_deposit: 100,
+    initial_deposit: 1000,
     max_inventory: 15,
-    min_spread: 1,
-    max_spread: 1,
-    spread: 1,
-    bid_price: 5,
-    sell_price: 10
+    min_spread: 0,
+    max_spread: 0,
+    spread: 0,
+    bid_price: 1,
+    sell_price: 1
   )
 
-{:ok, metal_factory_1} =
+{:ok, metal_factory} =
   FactoryAgent.start_link(
     bank: bank,
-    factory_no: "F-METAL-1",
+    factory_no: "F-METAL",
     initial_deposit: 100,
     output: 15,
     max_inventory: 15,
@@ -92,18 +78,6 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "METAL"}
   )
-
-# {:ok, metal_factory_2} =
-#   FactoryAgent.start_link(
-#     bank: bank,
-#     factory_no: "F-METAL-2",
-#     initial_deposit: 100,
-#     output: 5,
-#     max_inventory: 20,
-#     market: metal_market,
-#     initiate_sale: true,
-#     recipe: %Recipe{components: [], product_name: "METAL"}
-#   )
 
 ###############################################################################
 # End-product assembler factory
@@ -113,14 +87,13 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "keiretsu")
   MarketAgent.start_link(
     bank: bank,
     market_no: "M-ELECTRONIC",
-    # supplier: end_product_factory,
     initial_deposit: 1000,
     max_inventory: 15,
     min_spread: 1,
     max_spread: 5,
     spread: 2,
-    bid_price: 5,
-    sell_price: 10
+    bid_price: 10,
+    sell_price: 20
   )
 
 {:ok, end_product_factory} =
@@ -161,9 +134,9 @@ customers =
 {:ok, simulation} = SimulationAgent.start_link(simulation_id: "keiretsu")
 
 factories = [
-  glass_factory_1,
+  glass_factory,
   # glass_factory_2,
-  metal_factory_1,
+  metal_factory,
   # metal_factory_2,
   end_product_factory
 ]
@@ -181,7 +154,9 @@ cycles = 30
 
 Enum.each(1..cycles, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
-    # customers start each round by going to the store/retailer
+    ###########################################################################
+    # customers
+    ###########################################################################
     customers
     |> Enum.shuffle()
     |> Enum.each(fn person ->
@@ -191,7 +166,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # market and factory communication happens at the end of the day (restocking)
+    ###########################################################################
+    # factories
+    ###########################################################################
     factories
     |> Enum.shuffle()
     |> Enum.each(fn factory ->
@@ -201,6 +178,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
+    ###########################################################################
+    # markets
+    ###########################################################################
     markets
     |> Enum.shuffle()
     |> Enum.each(fn market ->
@@ -210,7 +190,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # bank audit happens at the very end
+    ###########################################################################
+    # banks
+    ###########################################################################
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)
 end)

@@ -1,90 +1,267 @@
-<div class="row">
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.sell_price</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.sell_price"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.bid_price</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.bid_price"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.spread</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.spread"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.products_sold</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.products_sold_total</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold_total"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.products_bought</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought"]) %>
-      </div>
-    </div>
-  </div>
-  <div class="p-3 col-6">
-    <div class="card">
-      <div class="card-header">market.products_bought_total</div>
-      <div class="card-body">
-        <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought_total"]) %>
-      </div>
-    </div>
-  </div>
-</div>
+
+
+<% sell_price_values = Enum.map(@time_series["market.sell_price"], fn [x,y|_] -> y end) %>
+<% bid_price_values = Enum.map(@time_series["market.bid_price"], fn [x,y|_] -> y end) %>
+<% spread_values = Enum.map(@time_series["market.spread"], fn [x,y|_] -> y end) %>
+<% products_sold_values = Enum.map(@time_series["market.products_sold"], fn [x,y|_] -> y end) %>
+<% products_bought_values = Enum.map(@time_series["market.products_bought"], fn [x,y|_] -> y end) %>
+<% inventory_count_values = Enum.map(@time_series["market.inventory_count"], fn [x,y|_] -> y end) %>
 
 <div class="row">
-  <div class="col">
-    <h2>Account History</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <td>bank_no</td>
-          <td>account_no</td>
-          <td>owner_type</td>
-          <td>owner_id</td>
-          <td>deposit</td>
-          <td>delta</td>
-          <td>cycle</td>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for deposit <- @deposits do %>
-        <tr>
-          <td><%= deposit.bank_no %></td>
-          <td><%= deposit.account_no %></td>
-          <td><%= deposit.owner_type %></td>
-          <td><%= deposit.owner_id %></td>
-          <td><%= deposit.deposit %></td>
-          <td><%= deposit.delta %></td>
-          <td><%= deposit.cycle %></td>
-        </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <div class="col-2">
+    <div class="row">
+      <div class="col">
+        <h2>Key Figures</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <td>Key</td>
+              <td>Value</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>min sell_priced</strong></td>
+              <td><%= Jason.encode!(Enum.min(sell_price_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max sell_price</strong></td>
+              <td><%= Jason.encode!(Enum.max(sell_price_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg sell_price</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(sell_price_values) / length(sell_price_values))) %></td>
+            </tr>
+
+            <tr style="background-color: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>min bid_price</strong></td>
+              <td><%= Jason.encode!(Enum.min(bid_price_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max bid_price</strong></td>
+              <td><%= Jason.encode!(Enum.max(bid_price_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg bid_price</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(bid_price_values) / length(bid_price_values))) %></td>
+            </tr>
+
+            <tr style="background-color: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>min spread</strong></td>
+              <td><%= Jason.encode!(Enum.min(spread_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max spread</strong></td>
+              <td><%= Jason.encode!(Enum.max(spread_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg spread</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(spread_values) / length(spread_values))) %></td>
+            </tr>
+
+            <tr style="background-color: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>total products_sold</strong></td>
+              <td><%= Jason.encode!(Enum.sum(products_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>min products_sold</strong></td>
+              <td><%= Jason.encode!(Enum.min(products_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max products_sold</strong></td>
+              <td><%= Jason.encode!(Enum.max(products_sold_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg products_sold</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(products_sold_values) / length(products_sold_values))) %></td>
+            </tr>
+
+            <tr style="background-color: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>total products_bought</strong></td>
+              <td><%= Jason.encode!(Enum.sum(products_bought_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>min products_bought</strong></td>
+              <td><%= Jason.encode!(Enum.min(products_bought_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max products_bought</strong></td>
+              <td><%= Jason.encode!(Enum.max(products_bought_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg products_bought</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(products_bought_values) / length(products_bought_values))) %></td>
+            </tr>
+
+            <tr style="background-color: #ccc">
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td><strong>min inventory_count</strong></td>
+              <td><%= Jason.encode!(Enum.min(inventory_count_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>max inventory_count</strong></td>
+              <td><%= Jason.encode!(Enum.max(inventory_count_values)) %></td>
+            </tr>
+            <tr>
+              <td><strong>avg inventory_count</strong></td>
+              <td><%= Jason.encode!(round(Enum.sum(inventory_count_values) / length(inventory_count_values))) %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="row">
+      <div class="col">
+        <h2>Account History</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <td>bank_no</td>
+              <td>account_no</td>
+              <td>owner_type</td>
+              <td>owner_id</td>
+              <td>deposit</td>
+              <td>delta</td>
+              <td>cycle</td>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for deposit <- @deposits do %>
+            <tr>
+              <td><%= deposit.bank_no %></td>
+              <td><%= deposit.account_no %></td>
+              <td><%= deposit.owner_type %></td>
+              <td><%= deposit.owner_id %></td>
+              <td><%= deposit.deposit %></td>
+              <td><%= deposit.delta %></td>
+              <td><%= deposit.cycle %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+  <div class="row">
+    <div class="col">
+      <h2>Transactions</h2>
+      <div class="row">
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.sell_price</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.sell_price"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.bid_price</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.bid_price"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.spread</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.spread"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.products_sold</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.products_sold_total</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_sold_total"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.products_bought</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.products_bought_total</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.products_bought_total"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.inventory_count</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.inventory_count"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.avg_spread</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.avg_spread"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.avg_bid_price</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.avg_bid_price"]) %>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 col-6">
+          <div class="card">
+            <div class="card-header">market.avg_sell_price</div>
+            <div class="card-body">
+              <%= raw Chartkick.line_chart Jason.encode!(@time_series["market.avg_sell_price"]) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

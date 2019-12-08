@@ -169,8 +169,8 @@ defmodule FiveBells.Agents.FactoryAgent do
               }
             end)
 
-          err ->
-            err
+          _ ->
+            :ok
         end
 
       false ->

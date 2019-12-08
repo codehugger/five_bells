@@ -12,10 +12,13 @@ defmodule FiveBells.Agents.MarketAgent do
       name: "Market",
       market_no: "M-0001",
       bid_price: 1,
+      bid_prices: [],
       sell_price: 2,
+      sell_prices: [],
       min_spread: 1,
       max_spread: 4,
       spread: 4,
+      spreads: [],
       initial_deposit: 0,
       products_sold: 0,
       products_sold_total: 0,
@@ -340,6 +343,14 @@ defmodule FiveBells.Agents.MarketAgent do
           # lower prices in an attempt to get rid of some of it
           true -> lower_prices(agent)
         end
+
+        Agent.update(agent, fn x ->
+          %{
+            x
+            | bid_prices: x.bid_prices ++ [x.bid_price],
+              sell_prices: x.sell_prices ++ [x.sell_price]
+          }
+        end)
     end
   end
 
@@ -351,6 +362,13 @@ defmodule FiveBells.Agents.MarketAgent do
       account_delta(agent) == 0 -> decrease_spread(agent, 1)
       true -> :ok
     end
+
+    Agent.update(agent, fn x ->
+      %{
+        x
+        | spreads: x.spreads ++ [x.spread]
+      }
+    end)
   end
 
   defp raise_prices(agent, amount \\ 1) when amount >= 1 do
@@ -463,6 +481,38 @@ defmodule FiveBells.Agents.MarketAgent do
                agent,
                "market.spread",
                spread(agent),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "market.avg_spread",
+               round(Enum.sum(state(agent).spreads) / max(length(state(agent).spreads), 1)),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "market.avg_bid_price",
+               round(Enum.sum(state(agent).bid_prices) / max(length(state(agent).bid_prices), 1)),
+               cycle,
+               simulation_id
+             )
+           ),
+         {:ok, _} <-
+           FiveBells.Repo.insert(
+             create_time_series_entry(
+               agent,
+               "market.avg_sell_price",
+               round(
+                 Enum.sum(state(agent).sell_prices) / max(length(state(agent).sell_prices), 1)
+               ),
                cycle,
                simulation_id
              )

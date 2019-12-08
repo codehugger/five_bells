@@ -33,7 +33,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     max_inventory: 15,
     min_spread: 1,
     max_spread: 5,
-    spread: 1,
+    spread: 2,
     bid_price: 1,
     sell_price: 2
   )
@@ -42,9 +42,9 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
   FactoryAgent.start_link(
     bank: bank,
     factory_no: "F-RAW-GLASS-1",
-    initial_deposit: 1000,
-    output: 15,
-    max_inventory: 30,
+    initial_deposit: 100,
+    output: 10,
+    max_inventory: 20,
     market: raw_glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "RAW-GLASS"}
@@ -54,12 +54,53 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
   FactoryAgent.start_link(
     bank: bank,
     factory_no: "F-RAW-GLASS-2",
-    initial_deposit: 1000,
-    output: 15,
-    max_inventory: 30,
+    initial_deposit: 100,
+    output: 10,
+    max_inventory: 20,
     market: raw_glass_market,
     initiate_sale: true,
     recipe: %Recipe{components: [], product_name: "RAW-GLASS"}
+  )
+
+###############################################################################
+# Market style second-level provider -> RAW-METAL
+###############################################################################
+
+{:ok, raw_metal_market} =
+  MarketAgent.start_link(
+    market_no: "M-RAW-METAL",
+    bank: bank,
+    initial_deposit: 1000,
+    max_inventory: 15,
+    min_spread: 1,
+    max_spread: 5,
+    spread: 2,
+    bid_price: 1,
+    sell_price: 2
+  )
+
+{:ok, raw_metal_factory_1} =
+  FactoryAgent.start_link(
+    bank: bank,
+    factory_no: "F-RAW-METAL-1",
+    initial_deposit: 100,
+    output: 15,
+    max_inventory: 30,
+    market: raw_metal_market,
+    initiate_sale: true,
+    recipe: %Recipe{components: [], product_name: "RAW-METAL"}
+  )
+
+{:ok, raw_metal_factory_2} =
+  FactoryAgent.start_link(
+    bank: bank,
+    factory_no: "F-RAW-METAL-2",
+    initial_deposit: 100,
+    output: 15,
+    max_inventory: 30,
+    market: raw_metal_market,
+    initiate_sale: true,
+    recipe: %Recipe{components: [], product_name: "RAW-METAL"}
   )
 
 ###############################################################################
@@ -72,11 +113,11 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     market_no: "M-GLASS",
     initial_deposit: 1000,
     max_inventory: 15,
-    min_spread: 1,
-    max_spread: 2,
-    spread: 1,
+    min_spread: 0,
+    max_spread: 0,
+    spread: 0,
     bid_price: 1,
-    sell_price: 2
+    sell_price: 1
   )
 
 {:ok, glass_factory_1} =
@@ -93,48 +134,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
   )
 
 ###############################################################################
-# Market style second-level provider -> RAW-METAL
-###############################################################################
-
-{:ok, raw_metal_market} =
-  MarketAgent.start_link(
-    market_no: "M-RAW-METAL",
-    bank: bank,
-    initial_deposit: 1000,
-    max_inventory: 15,
-    min_spread: 1,
-    max_spread: 5,
-    spread: 1,
-    bid_price: 1,
-    sell_price: 2
-  )
-
-{:ok, raw_metal_factory_1} =
-  FactoryAgent.start_link(
-    bank: bank,
-    factory_no: "F-RAW-METAL-1",
-    initial_deposit: 1000,
-    output: 15,
-    max_inventory: 30,
-    market: raw_metal_market,
-    initiate_sale: true,
-    recipe: %Recipe{components: [], product_name: "RAW-METAL"}
-  )
-
-{:ok, raw_metal_factory_2} =
-  FactoryAgent.start_link(
-    bank: bank,
-    factory_no: "F-RAW-METAL-2",
-    initial_deposit: 1000,
-    output: 15,
-    max_inventory: 30,
-    market: raw_metal_market,
-    initiate_sale: true,
-    recipe: %Recipe{components: [], product_name: "RAW-METAL"}
-  )
-
-###############################################################################
-# Market style first-level provider -> GLASS
+# Market style first-level provider -> METAL
 ###############################################################################
 
 {:ok, metal_market} =
@@ -143,11 +143,11 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     market_no: "M-METAL",
     initial_deposit: 1000,
     max_inventory: 15,
-    min_spread: 1,
-    max_spread: 1,
-    spread: 1,
+    min_spread: 0,
+    max_spread: 0,
+    spread: 0,
     bid_price: 1,
-    sell_price: 2
+    sell_price: 1
   )
 
 {:ok, metal_factory_1} =
@@ -172,12 +172,12 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     bank: bank,
     market_no: "M-ELECTRONIC",
     initial_deposit: 1000,
-    max_inventory: 5,
+    max_inventory: 15,
     min_spread: 1,
     max_spread: 5,
-    spread: 1,
-    bid_price: 3,
-    sell_price: 4
+    spread: 2,
+    bid_price: 10,
+    sell_price: 20
   )
 
 {:ok, end_product_factory} =
@@ -185,8 +185,8 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     bank: bank,
     factory_no: "F-ELECTRONIC",
     initial_deposit: 1000,
-    output: 5,
-    max_inventory: 5,
+    output: 15,
+    max_inventory: 15,
     initiate_sale: true,
     recipe: %Recipe{components: ["GLASS", "METAL"], product_name: "ELECTRONIC"},
     suppliers: %{"GLASS" => glass_market, "METAL" => metal_market},
@@ -205,7 +205,7 @@ customers =
         person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: end_product_market,
-        initial_deposit: 200
+        initial_deposit: 100
       )
 
     customer
@@ -233,14 +233,16 @@ markets = [raw_glass_market, raw_metal_market, metal_market, glass_market, end_p
 # Evaluate
 ###############################################################################
 
-cycles = 60
+cycles = 30
 
 # IO.inspect(:sys.get_state(end_product_factory))
 # IO.inspect(:sys.get_state(end_product_market))
 
 Enum.each(1..cycles, fn _ ->
   SimulationAgent.evaluate(simulation, fn cycle, simulation_id ->
-    # customers start each round by going to the store/retailer
+    ###########################################################################
+    # customers
+    ###########################################################################
     customers
     |> Enum.shuffle()
     |> Enum.each(fn person ->
@@ -250,7 +252,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # market and factory communication happens at the end of the day (restocking)
+    ###########################################################################
+    # factories
+    ###########################################################################
     factories
     |> Enum.shuffle()
     |> Enum.each(fn factory ->
@@ -260,6 +264,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
+    ###########################################################################
+    # markets
+    ###########################################################################
     markets
     |> Enum.shuffle()
     |> Enum.each(fn market ->
@@ -269,7 +276,9 @@ Enum.each(1..cycles, fn _ ->
       end
     end)
 
-    # bank audit happens at the very end
+    ###########################################################################
+    # banks
+    ###########################################################################
     BankAgent.evaluate(bank, cycle, simulation_id)
   end)
 end)
