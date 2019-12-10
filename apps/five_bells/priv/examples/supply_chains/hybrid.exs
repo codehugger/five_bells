@@ -172,12 +172,7 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "hybrid")
     bank: bank,
     market_no: "M-ELECTRONIC",
     initial_deposit: 1000,
-    max_inventory: 15,
-    min_spread: 1,
-    max_spread: 5,
-    spread: 2,
-    bid_price: 10,
-    sell_price: 20
+    max_inventory: 15
   )
 
 {:ok, end_product_factory} =
