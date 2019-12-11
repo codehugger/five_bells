@@ -23,7 +23,8 @@ defmodule FiveBells.Agents.FactoryAgent do
       inventory: [],
       unit_cost: 1,
       market: nil,
-      suppliers: %{}
+      suppliers: %{},
+      fixed_supplier_prices: false
     ]
   end
 
@@ -148,6 +149,12 @@ defmodule FiveBells.Agents.FactoryAgent do
         # How much can we actually produce?
         quantity = production_capacity(agent)
 
+        price =
+          case state(agent).fixed_supplier_prices do
+            true -> MarketAgent.bid_price(state(agent).market)
+            false -> -1
+          end
+
         if quantity == 0 do
           IO.puts("Quantity being produced #{quantity}")
           IO.puts("Max items is #{max_items(agent)}")
@@ -156,7 +163,7 @@ defmodule FiveBells.Agents.FactoryAgent do
         end
 
         # Go to our suppliers and get the necessary components
-        case acquire_components(agent, state(agent).recipe.components, quantity) do
+        case acquire_components(agent, state(agent).recipe.components, quantity, price) do
           {:ok, _components} ->
             produced = Enum.map(1..quantity, fn _ -> Recipe.produce(state(agent).recipe) end)
 
@@ -178,9 +185,9 @@ defmodule FiveBells.Agents.FactoryAgent do
     end
   end
 
-  def acquire_components(agent, names, quantity \\ 1, purchased \\ %{}) do
+  def acquire_components(agent, names, quantity \\ 1, price \\ -1, purchased \\ %{}) do
     with :ok <- check_component_availability(agent, names, quantity),
-         {:ok, _} = resp <- purchase_components(agent, names, quantity, purchased) do
+         {:ok, _} = resp <- purchase_components(agent, names, quantity, price, purchased) do
       resp
     else
       err -> err
@@ -205,18 +212,24 @@ defmodule FiveBells.Agents.FactoryAgent do
     end
   end
 
-  def purchase_components(_agent, _names, _quantity \\ 1, _purchased \\ %{})
-  def purchase_components(_agent, [], _quantity, purchased), do: {:ok, purchased}
+  def purchase_components(_agent, _names, _quantity \\ 1, _price \\ -1, _purchased \\ %{})
+  def purchase_components(_agent, [], _quantity, _price, purchased), do: {:ok, purchased}
 
-  def purchase_components(agent, [name | tail], quantity, purchased) do
+  def purchase_components(agent, [name | tail], quantity, price, purchased) do
     case state(agent).suppliers[name] do
       nil ->
         {:error, {:no_supplier_for_component, name}}
 
       supplier ->
-        case MarketAgent.sell_to_customer(supplier, agent, quantity) do
+        case MarketAgent.sell_to_customer(supplier, agent, quantity, price) do
           {:ok, products} ->
-            purchase_components(agent, tail, quantity, Map.put_new(purchased, name, products))
+            purchase_components(
+              agent,
+              tail,
+              quantity,
+              price,
+              Map.put_new(purchased, name, products)
+            )
 
           err ->
             err

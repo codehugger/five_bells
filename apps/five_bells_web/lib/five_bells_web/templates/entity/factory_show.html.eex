@@ -4,7 +4,7 @@
 <% output_remaining_values = Enum.map(@time_series["factory.output_remaining"], fn [x,y|_] -> y end) %>
 
 <div class="row">
-  <div class="col-2">
+  <div class="col-lg-2">
     <div class="row">
       <div class="col">
         <h2>Key Figures</h2>
@@ -99,7 +99,7 @@
       </div>
     </div>
   </div>
-  <div class="col-4">
+  <div class="col-lg-4">
     <div class="row">
       <div class="col">
         <h2>Account History</h2>
@@ -131,8 +131,13 @@
         </table>
       </div>
     </div>
+    <div class="row">
+      <div class="col">
+        coordinates {<%= Enum.map(Enum.reverse(@deposits), fn x -> "(#{x.cycle},#{x.deposit})" end) %>};
+      </div>
+    </div>
   </div>
-  <div class="col-6">
+  <div class="col-lg-6">
     <div class="row">
       <div class="col">
         <h2>Statistics</h2>
@@ -142,7 +147,7 @@
               <div class="card-header">factory.units_sold</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold"]) %>
-                {<%= Enum.map(@time_series["factory.units_sold"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.units_sold"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>
@@ -151,7 +156,7 @@
               <div class="card-header">factory.units_sold_total</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_sold_total"]) %>
-                {<%= Enum.map(@time_series["factory.units_sold_total"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.units_sold_total"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>
@@ -160,7 +165,7 @@
               <div class="card-header">factory.inventory_count</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.inventory_count"]) %>
-                {<%= Enum.map(@time_series["factory.inventory_count"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.inventory_count"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>
@@ -169,7 +174,7 @@
               <div class="card-header">factory.units_produced</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced"]) %>
-                {<%= Enum.map(@time_series["factory.units_produced"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.units_produced"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>
@@ -178,7 +183,7 @@
               <div class="card-header">factory.units_produced_total</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.units_produced_total"]) %>
-                {<%= Enum.map(@time_series["factory.units_produced_total"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.units_produced_total"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>
@@ -187,7 +192,7 @@
               <div class="card-header">factory.output_remaining</div>
               <div class="card-body">
                 <%= raw Chartkick.line_chart Jason.encode!(@time_series["factory.output_remaining"]) %>
-                {<%= Enum.map(@time_series["factory.output_remaining"], fn [x,y|_] -> "(#{x},#{y})" end) %>}
+                coordinates {<%= Enum.map(@time_series["factory.output_remaining"], fn [x,y|_] -> "(#{x},#{y})" end) %>};
               </div>
             </div>
           </div>

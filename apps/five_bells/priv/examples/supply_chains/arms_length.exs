@@ -123,14 +123,14 @@ from(t in FiveBells.Banks.Deposit, where: t.simulation_id == "arms_length")
 ###############################################################################
 
 customers =
-  Enum.map(1..10, fn x ->
+  Enum.map(1..20, fn x ->
     {:ok, customer} =
       PersonAgent.start_link(
         name: "Customer",
         person_no: "P-#{String.pad_leading("#{x}", 4, "0")}",
         bank: bank,
         market: end_product_market,
-        initial_deposit: 100
+        initial_deposit: 1000
       )
 
     customer
@@ -156,7 +156,7 @@ markets = [metal_market, glass_market, end_product_market]
 # Evaluate
 ###############################################################################
 
-cycles = 30
+cycles = 100
 
 # IO.inspect(:sys.get_state(end_product_factory))
 # IO.inspect(:sys.get_state(end_product_market))

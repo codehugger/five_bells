@@ -114,22 +114,28 @@ defmodule FiveBells.Agents.MarketAgent do
   # Sales / Customer
   #############################################################################
 
-  def sell_to_customer(agent, customer, quantity \\ 1) when is_pid(customer) do
+  def sell_to_customer(agent, customer, quantity \\ 1, price \\ -1) when is_pid(customer) do
     # the main things to consider here are
     # 1. do we have the requested quantity
     # 2. are we willing to go and buy to meet the quantity requirement
-    with {:ok, _products} = result <- sell_products(agent, customer, quantity) do
+    with {:ok, _products} = result <- sell_products(agent, customer, quantity, price) do
       result
     else
       err -> err
     end
   end
 
-  defp sell_products(agent, customer, quantity) do
+  defp sell_products(agent, customer, quantity, price) do
     # the things to consider here are
     # 1. do we have the given quantity in inventory
     # 2. did the transfer from the customer go through?
     # 3. were we able to hand over the requsted products?
+    sales_price =
+      case price do
+        -1 -> sell_price(agent)
+        _ -> price
+      end
+
     case quantity_available?(agent, quantity) do
       false ->
         {:error, {:not_enough_stock, [available: inventory_count(agent), requested: quantity]}}
@@ -139,7 +145,7 @@ defmodule FiveBells.Agents.MarketAgent do
                bank(agent),
                customer,
                agent,
-               quantity * sell_price(agent),
+               quantity * sales_price,
                "Product purchase"
              ) do
           :ok ->
@@ -160,7 +166,7 @@ defmodule FiveBells.Agents.MarketAgent do
                   customer,
                   bank(agent),
                   agent,
-                  quantity * sell_price(agent),
+                  quantity * sales_price,
                   "Refund product purchase"
                 )
 
@@ -323,6 +329,9 @@ defmodule FiveBells.Agents.MarketAgent do
 
   defp adjust_prices(agent) do
     cond do
+      state(agent).max_spread == 1 ->
+        :ok
+
       # inventory is growing lower prices
       inventory_growing?(agent) ->
         lower_prices(agent)
@@ -358,6 +367,7 @@ defmodule FiveBells.Agents.MarketAgent do
     IO.puts("#{state(agent).name} adjusting spread")
 
     cond do
+      state(agent).max_spread == 1 -> :ok
       account_delta(agent) > 0 -> increase_spread(agent, 1)
       account_delta(agent) == 0 -> decrease_spread(agent, 1)
       true -> :ok
