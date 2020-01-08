@@ -29,3 +29,7 @@ cd into the root folder and run
 ## Running simulations
 
 cd into root folder and run `mix run /apps/five_bells/prive/examples/name_of_simulation.exs`
+
+## Historical Reference for the name
+
+https://ripple.com/insights/bank-of-england-how-our-modern-payment-system-began-at-a-bar/
