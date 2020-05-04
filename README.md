@@ -15,7 +15,7 @@ Edit `dev.exs` in the config folder according to your Postgres configuration.
 
 ## Ecto Database
 
-cd into the `apps/five_bells/` folder and run 
+cd into the `apps/five_bells/` folder and run
 
 * `mix ecto.create`
 * `mix ecto.migrate`

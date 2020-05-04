@@ -1,11 +1,11 @@
 
 
-<% sell_price_values = Enum.map(@time_series["market.sell_price"], fn [x,y|_] -> y end) %>
-<% bid_price_values = Enum.map(@time_series["market.bid_price"], fn [x,y|_] -> y end) %>
-<% spread_values = Enum.map(@time_series["market.spread"], fn [x,y|_] -> y end) %>
-<% products_sold_values = Enum.map(@time_series["market.products_sold"], fn [x,y|_] -> y end) %>
-<% products_bought_values = Enum.map(@time_series["market.products_bought"], fn [x,y|_] -> y end) %>
-<% inventory_count_values = Enum.map(@time_series["market.inventory_count"], fn [x,y|_] -> y end) %>
+<% sell_price_values = Enum.map(@time_series["market.sell_price"], fn [_x,y|_] -> y end) %>
+<% bid_price_values = Enum.map(@time_series["market.bid_price"], fn [_x,y|_] -> y end) %>
+<% spread_values = Enum.map(@time_series["market.spread"], fn [_x,y|_] -> y end) %>
+<% products_sold_values = Enum.map(@time_series["market.products_sold"], fn [_x,y|_] -> y end) %>
+<% products_bought_values = Enum.map(@time_series["market.products_bought"], fn [_x,y|_] -> y end) %>
+<% inventory_count_values = Enum.map(@time_series["market.inventory_count"], fn [_x,y|_] -> y end) %>
 
 <div class="row">
   <div class="col-lg-2">

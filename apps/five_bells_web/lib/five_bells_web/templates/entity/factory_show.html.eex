@@ -1,7 +1,7 @@
-<% units_sold_values = Enum.map(@time_series["factory.units_sold"], fn [x,y|_] -> y end) %>
-<% inventory_count_values = Enum.map(@time_series["factory.inventory_count"], fn [x,y|_] -> y end) %>
-<% units_produced_values = Enum.map(@time_series["factory.units_produced"], fn [x,y|_] -> y end) %>
-<% output_remaining_values = Enum.map(@time_series["factory.output_remaining"], fn [x,y|_] -> y end) %>
+<% units_sold_values = Enum.map(@time_series["factory.units_sold"], fn [_x,y|_] -> y end) %>
+<% inventory_count_values = Enum.map(@time_series["factory.inventory_count"], fn [_x,y|_] -> y end) %>
+<% units_produced_values = Enum.map(@time_series["factory.units_produced"], fn [_x,y|_] -> y end) %>
+<% output_remaining_values = Enum.map(@time_series["factory.output_remaining"], fn [_x,y|_] -> y end) %>
 
 <div class="row">
   <div class="col-lg-2">
